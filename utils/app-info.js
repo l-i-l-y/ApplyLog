@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.0'
+const APP_VERSION = '1.0.1'
 function versionInfo() {
   let runtime = {}
   try { runtime = wx.getAccountInfoSync().miniProgram || {} } catch (error) { /* Older environments may omit this API. */ }
