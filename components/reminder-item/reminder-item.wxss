@@ -2,11 +2,15 @@
 .reminder-item {
   display: flex;
   flex-direction: column;
-  padding: 16rpx 24rpx;
+  padding: 24rpx 28rpx;
 }
 
 .reminder-compact {
-  padding: 8rpx 16rpx;
+  padding: 20rpx 20rpx;
+}
+
+.reminder-main {
+  align-items: flex-start;
 }
 
 .reminder-symbol {
@@ -15,22 +19,18 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 56rpx;
-  height: 56rpx;
-  margin-right: 8rpx;
-  border-radius: 16rpx;
-  font-size: 24rpx;
-  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  margin-right: 20rpx;
+  border-radius: var(--radius-sm);
 }
 
 .reminder-interview {
-  background-color: #FFF0DF;
-  color: #985016;
+  background-color: var(--warning-soft);
 }
 
 .reminder-followup {
   background-color: var(--primary-soft);
-  color: var(--primary-strong);
 }
 
 .reminder-copy,
@@ -40,47 +40,64 @@
   flex-direction: column;
 }
 
+.reminder-copy {
+  min-height: 36px;
+  justify-content: center;
+}
+
 .reminder-title,
 .reminder-subtitle {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
 }
 
 .reminder-title {
   color: var(--ink);
-  font-size: 27rpx;
-  font-weight: 650;
-  line-height: 1.25;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .reminder-subtitle {
-  margin-top: 8rpx;
+  margin-top: 2rpx;
   color: var(--muted);
-  font-size: 22rpx;
-  line-height: 1.25;
+  font-size: var(--text-caption);
+  line-height: 1.45;
 }
 
 .reminder-when {
   flex-shrink: 0;
   align-items: flex-end;
-  margin-left: 8rpx;
+  min-height: 36px;
+  justify-content: center;
+  margin-left: 16rpx;
 }
 
 .reminder-time {
   color: var(--primary-strong);
-  font-size: 24rpx;
-  font-weight: 650;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.reminder-time-done {
+  color: var(--subtle);
+  font-weight: 500;
+}
+
+.reminder-state {
+  color: var(--subtle);
+  font-size: var(--text-tag);
+  line-height: 1.45;
 }
 
 .reminder-overdue {
   color: var(--danger);
-  font-size: 24rpx;
 }
 
 .reminder-extra {
-  margin: 8rpx 0 0 68rpx;
+  margin: 16rpx 0 0 56px;
   color: var(--muted);
-  font-size: 24rpx;
+  font-size: var(--text-caption);
+  line-height: 1.6;
   word-break: break-all;
 }

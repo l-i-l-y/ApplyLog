@@ -1,3 +1,4 @@
+const { syncTabBar, setTabKeyboard } = require('../../utils/tabbar')
 const { keyboardPage, keyboardData } = require('../../utils/keyboard')
 
 const store = require('../../utils/store')
@@ -7,6 +8,7 @@ const { applicationCard, applicationUrl, openPage, toast, updateHomeBadge } = re
 Page({
   ...keyboardPage,
   data: {
+    tabBarHeight: 58,
     ...keyboardData,
     loading: true,
     error: '',
@@ -18,9 +20,12 @@ Page({
   },
 
   onShow() {
+    syncTabBar(this, 1)
     this.startKeyboard()
     this.loadList()
   },
+
+  onKeyboardLayout(height) { setTabKeyboard(height > 0) },
 
   onHide() { this.stopKeyboard() },
 
@@ -97,13 +102,11 @@ Page({
       toast('这条投递记录已不存在')
       return
     }
-    const calendarNotice = record.reminders.some(item => item.calendarAddedAt || item.calendarPendingAt)
-      ? ' 已加入手机日历的提醒可在日历中移除。' : ''
     wx.showModal({
       title: '删除投递记录',
-      content: '将删除「' + record.company + '」的这条记录及其提醒和复盘。' + calendarNotice,
+      content: '将删除「' + record.company + '」的这条记录及其应用内提醒和复盘。手机日历事件和外部备份文件不会自动删除，需分别手动处理。',
       confirmText: '删除',
-      confirmColor: '#A13D51',
+      confirmColor: '#B03A50',
       success: ({ confirm }) => {
         if (!confirm) return
         try {

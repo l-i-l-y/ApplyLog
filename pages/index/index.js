@@ -1,5 +1,7 @@
+const { syncTabBar } = require('../../utils/tabbar')
 
 const store = require('../../utils/store')
+const guide = require('../../utils/guide')
 const { STATUSES } = require('../../utils/constants')
 const { homeDate, startOfWeek, toDateInput } = require('../../utils/date')
 const { applicationCard, applicationUrl, openPage, openTab, reminderView, updateHomeBadge } = require('../../utils/ui')
@@ -14,11 +16,14 @@ function greetingFor(now) {
 
 Page({
   data: {
+    tabBarHeight: 58,
+    showGuide: false,
     loading: true,
     error: '',
     greeting: '',
     dateLabel: '',
     total: 0,
+    pendingStatusCount: 0,
     weekAdded: 0,
     distribution: [],
     reminders: [],
@@ -30,6 +35,8 @@ Page({
   },
 
   onShow() {
+    syncTabBar(this, 0)
+    this.setData({ showGuide: guide.shouldShow() })
     this.loadHome()
   },
 
@@ -52,6 +59,7 @@ Page({
         greeting: greetingFor(now),
         dateLabel: homeDate(now),
         total: summary.total,
+        pendingStatusCount: summary.pendingStatusCount,
         weekAdded: summary.weekAdded,
         weekRange: toDateInput(startOfWeek(now)).slice(5) + ' 至 ' + toDateInput(now).slice(5),
         distribution,
@@ -89,6 +97,12 @@ Page({
 
   createApplication() {
     openPage('/pages/edit/edit')
+  },
+
+  openGuide() { openPage('/pages/help/help') },
+  dismissGuide() {
+    try { guide.acknowledge(); this.setData({ showGuide: false }) }
+    catch (error) { wx.showToast({ title: error.message, icon: 'none' }) }
   },
 
   openApplication(event) {

@@ -1,5 +1,5 @@
 
-const { STATUS, STATUS_BY_ID } = require('../../utils/constants')
+const { STATUS, STATUS_BY_ID, READABLE_STATUS_BY_ID, effectiveStatus } = require('../../utils/constants')
 
 Component({
   properties: {
@@ -8,7 +8,7 @@ Component({
   data: { appearance: STATUS_BY_ID[STATUS.SUBMITTED] },
   methods: {
     updateStatus(status) {
-      this.setData({ appearance: STATUS_BY_ID[status] || STATUS_BY_ID[STATUS.SUBMITTED] })
+      this.setData({ appearance: READABLE_STATUS_BY_ID[effectiveStatus(status)] || { label: '未知状态', color: '#5E6678', background: '#EEF0F4' } })
     }
   }
 })

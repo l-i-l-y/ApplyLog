@@ -1,21 +1,13 @@
 const { keyboardPage, keyboardData } = require('../../utils/keyboard')
 
 const store = require('../../utils/store')
-const { STATUSES, INTERVIEW_ROUNDS, REMINDER_TYPES, isDemoId } = require('../../utils/constants')
-const { toDateInput, toTimeInput, parseDate, formatDay } = require('../../utils/date')
+const { LEGACY_STATUS, STATUSES, effectiveStatus, INTERVIEW_ROUNDS, REMINDER_TYPES, isDemoId } = require('../../utils/constants')
+const { toDateInput, parseDate, formatDay } = require('../../utils/date')
+const { newReminderForm } = require('../../utils/reminder')
 const { addReminderToCalendar } = require('../../utils/calendar')
 const {
   applicationUrl, copyText, openPage, reminderView, returnToPrevious, timelineView, toast, updateHomeBadge
 } = require('../../utils/ui')
-
-function newReminderForm() {
-  const halfHour = 30 * 60 * 1000
-  const time = Math.ceil((Date.now() + 60000) / halfHour) * halfHour
-  return {
-    type: 'interview', date: toDateInput(time), time: toTimeInput(time),
-    roundIndex: 0, location: '', link: '', note: ''
-  }
-}
 
 Page({
   ...keyboardPage,
@@ -27,6 +19,8 @@ Page({
     statusSteps: STATUSES,
     statusNote: '',
     timeline: [],
+    timelineManaging: false,
+    timelineBusy: false,
     reminders: [],
     reviews: [],
     reminderTypes: REMINDER_TYPES,
@@ -43,15 +37,17 @@ Page({
   },
 
   onShow() {
+    this.openingReminder = false
     this.startKeyboard()
     this.setData({ calendarPendingId: '' })
     this.loadDetail()
   },
 
-  onHide() { this.stopKeyboard() },
+  onHide() { this.stopKeyboard(); this.exitTimelineManagement() },
 
   onUnload() {
     this.stopKeyboard()
+    this.exitTimelineManagement()
     this.disposed = true
   },
 
@@ -67,11 +63,21 @@ Page({
         return
       }
       const { timeline, reminders, interviews, ...record } = application
+      const revision = this.timelineRevision = (this.timelineRevision || 0) + 1
+      const fingerprint = JSON.stringify(timeline)
+      this.timelineRows = new Map()
+      const timelineRows = timeline.map((entry, index) => {
+        const key = revision + '-' + index
+        this.timelineRows.set(key, { index, fingerprint })
+        return { ...timelineView(entry, now), key }
+      }).reverse()
       this.setData({
         loading: false,
         error: '',
-        record: { ...record, dateLabel: toDateInput(record.appliedAt), demo: isDemoId(record.id) },
-        timeline: timeline.slice().reverse().map((entry, index) => ({ ...timelineView(entry, now), key: index })),
+        record: { ...record, dateLabel: toDateInput(record.appliedAt), demo: isDemoId(record.id),
+          displayStatus: effectiveStatus(record.status), needsStatusConfirmation: record.status === LEGACY_STATUS.WITHDRAWN,
+          legacyAssessment: record.status === LEGACY_STATUS.ASSESSMENT },
+        timeline: timelineRows,
         reminders: reminders.slice()
           .sort((a, b) => Number(a.done) - Number(b.done) || (a.done ? b.time - a.time : a.time - b.time))
           .map(item => reminderView(item, now)),
@@ -92,6 +98,54 @@ Page({
 
   openEditor() {
     openPage(applicationUrl('edit', this.applicationId))
+  },
+
+  exitTimelineManagement() {
+    this.timelineOperation = null
+    this.timelineRows = new Map()
+    this.setData({ timelineManaging: false, timelineBusy: false })
+  },
+
+  toggleTimelineManagement() {
+    if (this.timelineOperation || this.data.loading || this.data.error) return
+    this.setData({ timelineManaging: !this.data.timelineManaging })
+  },
+
+  deleteTimeline(event) {
+    if (!this.data.timelineManaging || this.timelineOperation || this.data.loading || this.data.error) return
+    const key = event.currentTarget.dataset.key
+    const target = this.timelineRows && this.timelineRows.get(key)
+    if (!target) return
+    const operation = {}
+    this.timelineOperation = operation
+    this.setData({ timelineBusy: true })
+    const release = () => {
+      if (this.timelineOperation !== operation) return
+      this.timelineOperation = null
+      this.setData({ timelineBusy: false })
+    }
+    try {
+      wx.showModal({
+        title: '删除时间线记录',
+        content: '删除不会改变当前投递状态；相关历史统计可能随之更新。',
+        confirmText: '删除', confirmColor: '#B03A50',
+        success: ({ confirm }) => {
+          if (this.timelineOperation !== operation) return
+          try {
+            if (!confirm) return
+            if (!this.data.timelineManaging || this.timelineRows.get(key) !== target) {
+              toast('时间线已更新，请重新选择要删除的记录')
+              return
+            }
+            store.removeTimelineEntry(this.applicationId, target)
+            this.loadDetail()
+            toast('时间线记录已删除', 'success')
+          } catch (error) { toast(error.message) }
+          finally { release() }
+        },
+        fail: release
+      })
+    } catch (error) { release(); toast('暂时无法确认删除，请重试') }
   },
 
   copyJobLink() {
@@ -122,6 +176,16 @@ Page({
     } else {
       this.setData({ showReminderForm: true, reminderForm: Object.keys(this.data.reminderForm).length ? this.data.reminderForm : newReminderForm(), reminderError: '' })
     }
+  },
+
+  chooseCurrentStatus() {
+    wx.showActionSheet({
+      alertText: '历史“已放弃”不等于未通过，请确认新的投递状态',
+      itemList: STATUSES.map(item => item.label),
+      success: ({ tapIndex }) => {
+        if (STATUSES[tapIndex]) this.selectStatus({ currentTarget: { dataset: { status: STATUSES[tapIndex].id } } })
+      }
+    })
   },
 
   changeReminderType(event) {
@@ -177,15 +241,32 @@ Page({
     }
   },
 
+  openReminder(event) {
+    if (this.openingReminder || this.data.loading || this.data.error) return
+    const reminderId = event.currentTarget.dataset.id
+    try {
+      const record = store.get(this.applicationId)
+      if (!record || !record.reminders.some(item => item.id === reminderId)) {
+        toast(record ? '这条提醒已不存在' : '这条投递记录已不存在')
+        this.loadDetail()
+        return
+      }
+      this.openingReminder = true
+      const fail = () => { this.openingReminder = false; toast('暂时无法打开页面，请重试') }
+      try { wx.navigateTo({ url: applicationUrl('reminder-edit', this.applicationId) + '&reminder=' + encodeURIComponent(reminderId), fail }) }
+      catch (error) { fail() }
+    } catch (error) { toast(error.message) }
+  },
+
   deleteReminder(event) {
     const reminderId = event.currentTarget.dataset.id
     const reminder = this.data.reminders.find(item => item.id === reminderId)
     if (!reminder) return
     wx.showModal({
       title: '删除提醒',
-      content: reminder.calendarAddedAt || reminder.calendarPendingAt ? '如需同步取消，请在手机日历中删除对应事件。' : '确定删除这条提醒吗？',
+      content: '确定删除这条应用内提醒吗？手机日历事件和外部备份文件不会自动删除，需分别手动处理。',
       confirmText: '删除',
-      confirmColor: '#A13D51',
+      confirmColor: '#B03A50',
       success: ({ confirm }) => {
         if (!confirm) return
         try {
@@ -209,7 +290,7 @@ Page({
     const reminderId = event.currentTarget.dataset.id
     const reminder = this.data.reminders.find(item => item.id === reminderId)
     if (!reminder) return
-    if (reminder.calendarPendingAt || reminder.calendarAddedAt) {
+    if (reminder.calendarPendingAt || reminder.calendarAddedAt || reminder.calendarReviewRequired) {
       this.confirmCalendarStatus(reminder)
       return
     }
@@ -277,7 +358,7 @@ Page({
         try {
           if (tapIndex === 1) {
             store.clearReminderCalendar(this.applicationId, reminder.id)
-          } else if (!reminder.calendarAddedAt) {
+          } else if (!reminder.calendarAddedAt || reminder.calendarReviewRequired) {
             store.markReminderCalendar(this.applicationId, reminder.id)
           }
           this.loadDetail()

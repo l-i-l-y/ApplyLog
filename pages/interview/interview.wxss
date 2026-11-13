@@ -1,11 +1,12 @@
 
 .review-company {
   word-break: break-all;
-  margin-right: 8rpx;
+  margin-right: 12rpx;
 }
 
 .review-position {
-  margin-top: 8rpx;
+  margin-top: 4rpx;
+  font-size: var(--text-secondary);
   word-break: break-all;
 }
 
@@ -20,33 +21,47 @@
 }
 
 .review-date {
-  margin-left: 16rpx;
+  margin-left: 20rpx;
+}
+
+.review-empty {
+  padding-top: 28rpx;
+  padding-bottom: 28rpx;
 }
 
 .question-card {
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
 }
 
 .question-title {
   color: var(--ink);
-  font-size: 28rpx;
+  font-size: var(--text-body);
   font-weight: 650;
 }
 
 .question-remove {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  min-width: 72rpx;
-  min-height: 72rpx;
+  min-width: 44px;
+  min-height: 44px;
   box-sizing: border-box;
-  padding: 8rpx;
+  margin: -8px -8px -8px 0;
+  padding: 0 8px;
   color: var(--danger);
-  font-size: 24rpx;
+  font-size: var(--text-secondary);
+  font-weight: 600;
 }
 
 .review-question-input {
-  height: 112rpx;
+  height: 72px;
+}
+
+.review-score-label {
+  color: var(--warning);
+  font-size: var(--text-secondary);
+  font-weight: 650;
 }
 
 .review-stars {
@@ -59,17 +74,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  width: 72rpx;
-  height: 72rpx;
+  width: 48px;
+  height: 48px;
   margin-right: 8rpx;
-  border-radius: 16rpx;
-  background-color: #F0F2F8;
-  color: #77829B;
-  font-size: 40rpx;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-muted);
 }
 
 .review-star-selected {
-  background-color: #FFF1DE;
-  color: #9B5809;
+  background-color: var(--warning-soft);
 }
-

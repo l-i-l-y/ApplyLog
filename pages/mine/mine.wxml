@@ -1,71 +1,124 @@
 
-<view class="page-shell">
+<view class="page-shell" style="height: calc(100vh - {{tabBarHeight}}px);">
   <view class="page-nav">
-    <navigation-bar title="我的" back="{{false}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+    <navigation-bar title="投递有数" back="{{false}}" loading="{{loading}}" background="#F4F6FA" color="#1A2338"></navigation-bar>
   </view>
-  <scroll-view class="page-scroll" type="list" scroll-y>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-into-view="{{preparedFileName ? 'mine-export-ready' : ''}}">
     <view class="page-content">
       <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取本机数据…</text></view>
       <view wx:elif="{{error}}">
-        <empty-state symbol="!" title="暂时无法读取本机数据" description="{{error}}" action-label="重试"
+        <empty-state icon="alert-danger" title="暂时无法读取本机数据" description="{{error}}" action-label="重试"
           bind:action="loadProfile"></empty-state>
-        <view class="button button-soft section" hover-class="is-pressed" bindtap="exportJson" aria-role="button"><text>导出原始 JSON 备份</text></view>
+        <view class="button button-secondary section" hover-class="is-pressed" bindtap="exportJson" aria-role="button"><text>复制原始 JSON（救援）</text></view>
       </view>
       <block wx:else>
         <view class="surface panel mine-summary">
           <text class="title">投递统计</text>
           <view class="mine-metrics">
             <view class="mine-metric">
-              <text class="mine-value">{{summary.total}}</text><text class="muted">总投递</text>
+              <text class="mine-value">{{summary.total}}</text><text class="subtle">总投递</text>
             </view>
             <view class="mine-metric">
-              <text class="mine-value">{{summary.weekAdded}}</text><text class="muted">本周新增</text>
+              <text class="mine-value">{{summary.weekAdded}}</text><text class="subtle">本周新增</text>
             </view>
             <view class="mine-metric">
-              <text class="mine-value">{{summary.replyRate}}%</text><text class="muted">回复率</text>
+              <view class="row mine-value-row"><text class="mine-value">{{summary.replyRate}}</text><text class="mine-unit">%</text></view><text class="subtle">回复率</text>
             </view>
             <view class="mine-metric">
-              <text class="mine-value">{{summary.offerRate}}%</text><text class="muted">Offer 率</text>
+              <view class="row mine-value-row"><text class="mine-value">{{summary.offerRate}}</text><text class="mine-unit">%</text></view><text class="subtle">Offer 率</text>
             </view>
           </view>
-          <text wx:if="{{summary.total}}" class="muted mine-method">回复按曾收到笔试、面试、Offer 或未通过的投递计算。Offer 率按曾获得 Offer 的投递计算。</text>
+          <text wx:if="{{summary.total}}" class="callout mine-method">回复率按当前状态及剩余时间线中的笔试／测评、面试、Offer、未通过计算。Offer 率按当前状态或剩余时间线中的 Offer 计算；删除历史可能更新统计。</text>
           <text wx:else class="muted mine-method">添加投递后，这里会汇总你的进度。</text>
+          <text wx:if="{{summary.pendingStatusCount}}" class="muted mine-method">{{summary.pendingStatusCount}} 条历史“已放弃”投递待确认，仍计入总数及已结束分组。</text>
         </view>
 
-        <view wx:if="{{summary.total}}" class="surface panel section">
+        <view class="surface section row mine-entry" hover-class="card-pressed" bindtap="openQuestions" aria-role="button" aria-label="面试题本，{{questionCount}} 道题">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/book-primary.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy">
+            <text class="mine-setting-title">面试题本</text>
+            <text class="muted">回顾每一次面试遇到的问题</text>
+          </view>
+          <text class="subtle mine-question-count">{{questionCount}} 道题</text>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+
+        <view wx:if="{{summary.total}}" class="surface panel section mine-status-summary">
           <text class="title">当前状态</text>
           <view class="mine-counts">
             <view wx:for="{{counts}}" wx:key="id" class="row-between mine-count">
               <status-tag status="{{item.id}}"></status-tag><text class="mine-count-value">{{item.count}}</text>
             </view>
           </view>
+          <text wx:if="{{summary.pendingStatusCount}}" class="muted mine-method mine-pending-status">另有 {{summary.pendingStatusCount}} 条历史“已放弃”投递待确认，计入总数及已结束分组。</text>
         </view>
 
-        <view class="surface panel section">
-          <text class="title">本机数据</text>
-          <view class="row-between mine-setting" hover-class="is-pressed" bindtap="exportJson" aria-role="button">
-            <view class="grow mine-setting-copy"><text class="mine-setting-title">导出数据</text><text class="muted">将记录以 JSON 格式复制到剪贴板</text></view>
-            <text class="link">复制 ›</text>
-          </view>
-          <view class="row-between mine-setting" hover-class="is-pressed" bindtap="loadDemo" aria-role="button">
-            <view class="grow mine-setting-copy"><text class="mine-setting-title">加载示例数据</text><text class="muted">体验不同的投递进度和近期提醒</text></view>
-            <text class="link">加载 ›</text>
-          </view>
-          <view wx:if="{{summary.demoCount}}" class="row-between mine-setting" hover-class="is-pressed" bindtap="removeDemo" aria-role="button">
-            <view class="grow mine-setting-copy"><text class="mine-setting-title">移除示例数据</text><text class="muted">当前有 {{summary.demoCount}} 条示例投递</text></view>
-            <text class="link">移除 ›</text>
-          </view>
-          <view wx:if="{{summary.total}}" class="row-between mine-setting" hover-class="is-pressed" bindtap="requestClear" aria-role="button">
-            <view class="grow mine-setting-copy"><text class="mine-setting-title mine-danger">清空数据</text><text class="muted">删除本机投递、应用内提醒与复盘</text></view>
-            <text class="mine-danger">›</text>
-          </view>
-        </view>
       </block>
 
-      <view class="surface panel section">
-        <text class="title">关于投递有数</text>
-        <text class="mine-brand">ApplyLog</text>
-        <text class="muted mine-about">记录求职投递、安排跟进和复盘面试。数据保存在当前设备。</text>
+      <text class="mine-group-label">本机数据</text>
+      <view class="surface mine-group mine-data">
+        <text class="muted mine-group-note">备份包含公司、薪资、面试记录等内容，请妥善保管并存到小程序之外。</text>
+        <view class="row mine-setting mine-export" hover-class="is-pressed" bindtap="exportBackup" aria-role="button" aria-disabled="{{exporting || sharing || clearing}}">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/upload-primary.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy"><text class="mine-setting-title">{{exporting ? '正在生成…' : '导出备份'}}</text><text class="muted">生成并核验后，再点击分享文件</text></view>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <view wx:if="{{preparedFileName}}" id="mine-export-ready" class="mine-export-ready">
+          <text class="muted mine-file-name">{{preparedFileName}}</text>
+          <view class="button button-primary mine-share-file" bindtap="shareBackup" hover-class="is-pressed" aria-role="button" aria-disabled="{{sharing || clearing || exporting}}"><text>{{sharing ? '分享处理中…' : '分享备份文件'}}</text></view>
+        </view>
+        <view class="row mine-setting mine-restore" hover-class="is-pressed" bindtap="openBackup" aria-role="button">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/download-primary.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy"><text class="mine-setting-title">恢复备份</text><text class="muted">先预览再整份替换；也可回滚至恢复前</text></view>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <view class="row mine-setting" hover-class="is-pressed" bindtap="exportJson" aria-role="button">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/copy-primary.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy"><text class="mine-setting-title">复制 JSON</text><text class="muted">保留原始导出；格式异常时仍可用于救援</text></view>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <text wx:if="{{fileMessage}}" class="callout mine-file-message" aria-live="polite">{{fileMessage}}</text>
+        <view wx:if="{{canManageDemo && !error}}" class="row mine-setting mine-demo-load" hover-class="is-pressed" bindtap="loadDemo" aria-role="button">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/sparkle-primary.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy"><text class="mine-setting-title">加载示例数据</text><text class="muted">体验不同的投递进度和近期提醒</text></view>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <view wx:if="{{canManageDemo && !error && summary.demoCount}}" class="row mine-setting mine-demo-remove" hover-class="is-pressed" bindtap="removeDemo" aria-role="button">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/sparkle-primary.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy"><text class="mine-setting-title">移除示例数据</text><text class="muted">当前有 {{summary.demoCount}} 条示例投递</text></view>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <view wx:if="{{!error}}" class="row mine-setting" hover-class="is-pressed" bindtap="requestClear" aria-role="button">
+          <view class="mine-setting-icon mine-setting-icon-danger" aria-hidden="true"><image class="icon" src="/assets/icons/trash-danger.svg" mode="aspectFit"></image></view>
+          <view class="grow mine-setting-copy"><text class="mine-setting-title mine-danger">清空投递与本机备份</text><text class="muted">外部备份和手机日历需分别手动处理</text></view>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+      </view>
+
+      <text class="mine-group-label">关于投递有数</text>
+      <view class="surface mine-group">
+        <view class="mine-brand-block">
+          <view class="row"><text class="mine-brand">ApplyLog</text><text class="subtle mine-version">V{{version.version}} · {{version.environment}}</text></view>
+          <text class="muted mine-about">记录求职投递、安排跟进和复盘面试。数据仅保存在当前设备，没有云同步。</text>
+        </view>
+        <view class="row mine-setting" bindtap="openGuide" hover-class="is-pressed" aria-role="button">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/help-primary.svg" mode="aspectFit"></image></view>
+          <text class="grow mine-setting-title">使用与提醒说明</text>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <view class="row mine-setting" bindtap="openPrivacy" hover-class="is-pressed" aria-role="button">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/shield-primary.svg" mode="aspectFit"></image></view>
+          <text class="grow mine-setting-title">隐私与数据说明</text>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </view>
+        <button wx:if="{{canFeedback}}" class="row mine-setting mine-feedback" open-type="feedback" hover-class="is-pressed" aria-label="微信意见反馈">
+          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/message-primary.svg" mode="aspectFit"></image></view>
+          <text class="grow mine-setting-title">用户反馈</text>
+          <text class="subtle mine-question-count">微信反馈</text>
+          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+        </button>
+        <text wx:else class="muted mine-group-note mine-feedback-note">请在手机微信的小程序菜单中查看反馈入口。</text>
+        <text class="subtle mine-group-footer">反馈由微信提供，请勿提交不必要的个人敏感信息。</text>
       </view>
     </view>
   </scroll-view>

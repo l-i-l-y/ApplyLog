@@ -14,7 +14,7 @@ function buildDemo(now) {
   const examples = [
     {
       key: 'cloud', company: '云岸科技', position: '产品设计师', channel: '内推', city: '上海', daysAgo: 2,
-      history: [STATUS.SUBMITTED, STATUS.ASSESSMENT, STATUS.INTERVIEW],
+      history: [STATUS.SUBMITTED, STATUS.INTERVIEW],
       note: '面试前准备作品集，重点介绍一次完整的产品迭代。',
       reminders: [reminder('demo-r-cloud', 'interview', timeOn(now, 1, 10, 30), { round: '二面', location: '线上会议' })],
       interviews: [{
@@ -31,7 +31,7 @@ function buildDemo(now) {
     },
     {
       key: 'data', company: '澄光数据', position: '前端开发工程师', channel: 'Boss直聘', city: '深圳', daysAgo: 1,
-      history: [STATUS.SUBMITTED, STATUS.ASSESSMENT],
+      history: [STATUS.SUBMITTED, STATUS.INTERVIEW],
       reminders: [reminder('demo-r-data', 'followup', timeOn(now, 3, 16, 0), { note: '查看在线测评的反馈。' })]
     },
     {
@@ -44,7 +44,7 @@ function buildDemo(now) {
     },
     {
       key: 'forest', company: '森谷创意', position: '品牌策划', channel: '其他', city: '成都', daysAgo: 11,
-      history: [STATUS.SUBMITTED, STATUS.WITHDRAWN]
+      history: [STATUS.SUBMITTED]
     }
   ]
 

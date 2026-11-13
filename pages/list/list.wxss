@@ -2,70 +2,61 @@
 .list-controls {
   display: flex;
   flex-direction: column;
-  padding: 16rpx 32rpx;
+  padding: 16rpx 32rpx 8rpx;
 }
 
 .list-search {
-  flex-direction: row;
-  min-height: 88rpx;
-  padding: 0 16rpx;
-  border-width: 2rpx;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 0 0 0 24rpx;
+  border-width: 1px;
   border-style: solid;
-  border-color: var(--line);
+  border-color: var(--line-strong);
+  border-radius: var(--radius);
+  background-color: var(--surface);
 }
 
 .search-mark {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-shrink: 0;
-  width: 40rpx;
-  margin-right: 8rpx;
-}
-
-.search-lens {
-  width: 22rpx;
-  height: 22rpx;
-  border-width: 3rpx;
-  border-style: solid;
-  border-color: var(--muted);
-  border-radius: 50%;
-}
-
-.search-handle {
-  width: 10rpx;
-  height: 3rpx;
-  margin-top: 16rpx;
-  border-radius: 4rpx;
-  background-color: var(--muted);
-  transform: rotate(45deg);
+  margin-right: 16rpx;
 }
 
 .search-input {
-  height: 80rpx;
+  height: 44px;
   color: var(--ink);
-  font-size: 28rpx;
+  font-size: var(--text-body);
+}
+
+.search-placeholder {
+  color: var(--subtle);
 }
 
 .search-clear {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 16rpx;
-  color: var(--muted);
-  font-size: 38rpx;
+  margin-left: 4px;
 }
 
+/* 7 个筛选标签保持单行，超出时横向滚动。 */
 .list-filters {
-  margin-top: 16rpx;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  /* Skyline 横向列表会把标签拉伸到容器高度，容器高度即标签热区。 */
+  height: 44px;
+  margin-top: 24rpx;
+}
+
+.list-filter-chip {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 
 .list-heading {
-  margin-top: 16rpx;
+  margin-top: 20rpx;
+}
+
+.list-heading-copy {
+  align-items: baseline;
 }
 
 .list-count {
@@ -73,16 +64,13 @@
 }
 
 .list-create {
-  display: flex;
-  align-items: center;
-  min-height: 80rpx;
-  padding: 8rpx 0 8rpx 16rpx;
+  padding-left: 16rpx;
 }
 
 .list-row {
   display: flex;
   flex-direction: column;
-  margin: 0 32rpx 16rpx;
+  margin: 0 32rpx 20rpx;
 }
 
 .list-bottom {

@@ -1,12 +1,12 @@
 
 <view class="page-shell">
   <view class="page-nav">
-    <navigation-bar title="投递详情" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+    <navigation-bar title="投递详情" loading="{{loading}}" background="#F4F6FA" color="#1A2338"></navigation-bar>
   </view>
   <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
     <view class="page-content page-content-safe">
       <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取投递详情…</text></view>
-      <empty-state wx:elif="{{error}}" title="暂时无法打开详情" description="{{error}}" action-label="重试" symbol="!" bind:action="loadDetail"></empty-state>
+      <empty-state wx:elif="{{error}}" title="暂时无法打开详情" description="{{error}}" action-label="重试" icon="alert-danger" bind:action="loadDetail"></empty-state>
       <block wx:else>
         <view class="surface panel detail-hero">
           <view class="row-between">
@@ -14,10 +14,17 @@
               <status-tag status="{{record.status}}"></status-tag>
               <text wx:if="{{record.demo}}" class="demo-pill detail-demo">示例</text>
             </view>
-            <view class="button button-small button-soft" hover-class="is-pressed" bindtap="openEditor" aria-role="button"><text>编辑信息</text></view>
+            <view class="button button-small button-soft" hover-class="is-pressed" bindtap="openEditor" aria-role="button">
+              <image class="icon icon-sm icon-before" src="/assets/icons/edit-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>编辑信息</text>
+            </view>
           </view>
           <text class="detail-company">{{record.company}}</text>
           <text class="detail-position">{{record.position}}</text>
+          <view wx:if="{{record.needsStatusConfirmation}}" class="callout legacy-status-notice">
+            <text>此投递保留历史“已放弃”状态，确认前按已结束分组。</text>
+            <view class="button button-small button-soft" bindtap="chooseCurrentStatus" hover-class="is-pressed" aria-role="button"><text>请选择新的投递状态</text></view>
+          </view>
+          <text wx:if="{{record.legacyAssessment}}" class="muted detail-note">历史状态：笔试／测评，现归入面试中；原时间线保留。</text>
           <view class="row-wrap detail-meta">
             <text class="detail-meta-item">投递于 {{record.dateLabel}}</text>
             <text wx:if="{{record.channel}}" class="detail-meta-item">{{record.channel}}</text>
@@ -25,24 +32,26 @@
             <text wx:if="{{record.salary}}" class="detail-meta-item">{{record.salary}}</text>
           </view>
           <text wx:if="{{record.note}}" class="detail-note" user-select="{{true}}">{{record.note}}</text>
-          <view wx:if="{{record.jdLink}}" class="link detail-job-link" hover-class="is-pressed" bindtap="copyJobLink" aria-role="button"><text>复制职位链接 ›</text></view>
+          <view wx:if="{{record.jdLink}}" class="text-action detail-job-link" hover-class="is-pressed" bindtap="copyJobLink" aria-role="button">
+            <image class="icon icon-sm icon-before" src="/assets/icons/link-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>复制职位链接</text>
+          </view>
         </view>
 
         <view class="surface panel section">
           <view class="row-between">
             <text class="title">投递进度</text>
-            <text class="muted">点击更新</text>
+            <text class="subtle">点击更新</text>
           </view>
           <view class="status-steps">
             <view wx:for="{{statusSteps}}" wx:key="id" class="status-step" data-status="{{item.id}}" hover-class="is-pressed" bindtap="selectStatus"
               aria-role="button" aria-label="{{item.label}}">
               <view class="status-step-track">
                 <view class="status-step-line {{index === 0 ? 'status-line-hidden' : ''}}"></view>
-                <view class="status-step-node" style="{{record.status === item.id ? 'border-color: ' + item.color + '; background-color: ' + item.color + ';' : ''}}"></view>
+                <view class="status-step-node" style="{{record.displayStatus === item.id ? 'border-color: ' + item.color + '; background-color: ' + item.color + ';' : ''}}"></view>
                 <view class="status-step-line {{index === statusSteps.length - 1 ? 'status-line-hidden' : ''}}"></view>
               </view>
-              <text class="status-step-label {{record.status === item.id ? 'status-step-active' : ''}}"
-                style="{{record.status === item.id ? 'color: ' + item.color + ';' : ''}}">{{item.short || item.label}}</text>
+              <text class="status-step-label {{record.displayStatus === item.id ? 'status-step-active' : ''}}"
+                style="{{record.displayStatus === item.id ? 'color: ' + item.color + ';' : ''}}">{{item.short || item.label}}</text>
             </view>
           </view>
           <input id="status-note" data-anchor="status-note" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur" bindkeyboardheightchange="onFieldKeyboardHeight" class="field-input status-note" value="{{statusNote}}" placeholder="更新状态时附带备注（选填）"
@@ -53,7 +62,7 @@
           <view class="section-head">
             <text class="title">面试与跟进提醒</text>
             <view class="button button-small button-soft" hover-class="is-pressed" bindtap="toggleReminderForm" aria-role="button">
-              <text>{{showReminderForm ? '收起表单' : '＋ 添加'}}</text>
+              <image wx:if="{{!showReminderForm}}" class="icon icon-sm icon-before" src="/assets/icons/plus-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>{{showReminderForm ? '收起表单' : '添加'}}</text>
             </view>
           </view>
 
@@ -66,13 +75,13 @@
               <view class="field reminder-form-half">
                 <text class="field-label">日期</text>
                 <picker mode="date" value="{{reminderForm.date}}" start="{{today}}" bindchange="pickReminderDate">
-                  <view class="field-picker {{reminderError ? 'field-invalid' : ''}}"><text>{{reminderForm.date}}</text><text class="subtle">›</text></view>
+                  <view class="field-picker {{reminderError ? 'field-invalid' : ''}}"><text>{{reminderForm.date}}</text><image class="icon icon-sm" src="/assets/icons/calendar-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view>
                 </picker>
               </view>
               <view class="field reminder-form-half reminder-form-second">
                 <text class="field-label">时间</text>
                 <picker mode="time" value="{{reminderForm.time}}" bindchange="pickReminderTime">
-                  <view class="field-picker {{reminderError ? 'field-invalid' : ''}}"><text>{{reminderForm.time}}</text><text class="subtle">›</text></view>
+                  <view class="field-picker {{reminderError ? 'field-invalid' : ''}}"><text>{{reminderForm.time}}</text><image class="icon icon-sm" src="/assets/icons/clock-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view>
                 </picker>
               </view>
             </view>
@@ -80,7 +89,7 @@
             <view wx:if="{{reminderForm.type === 'interview'}}" class="field">
               <text class="field-label">面试轮次</text>
               <picker mode="selector" range="{{rounds}}" value="{{reminderForm.roundIndex}}" bindchange="pickReminderRound">
-                <view class="field-picker"><text>{{rounds[reminderForm.roundIndex]}}</text><text class="subtle">›</text></view>
+                <view class="field-picker"><text>{{rounds[reminderForm.roundIndex]}}</text><image class="icon icon-sm" src="/assets/icons/chevron-down-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view>
               </picker>
             </view>
             <view class="field">
@@ -99,24 +108,26 @@
             <view class="button button-primary reminder-save" hover-class="is-pressed" bindtap="saveReminder" aria-role="button"><text>保存提醒</text></view>
           </view>
 
-          <view wx:if="{{!reminders.length && !showReminderForm}}" class="surface panel">
+          <view wx:if="{{!reminders.length && !showReminderForm}}" class="surface panel detail-empty">
             <text class="muted">添加提醒，记住下次面试或该跟进的时间。</text>
           </view>
           <view wx:for="{{reminders}}" wx:key="id" class="surface detail-reminder">
-            <reminder-item item="{{item}}"></reminder-item>
+            <view class="reminder-card-body" data-id="{{item.id}}" bindtap="openReminder" hover-class="card-pressed" aria-role="button" aria-label="编辑{{item.title}}，{{item.timeLabel}}">
+              <reminder-item item="{{item}}"></reminder-item>
+            </view>
             <view class="row-wrap reminder-actions">
-              <view class="button button-small button-soft reminder-action" data-id="{{item.id}}" hover-class="is-pressed" bindtap="toggleReminder" aria-role="button">
-                <text>{{item.done ? '恢复提醒' : '标记完成'}}</text>
+              <view class="button button-small button-secondary reminder-action" data-id="{{item.id}}" hover-class="is-pressed" catchtap="toggleReminder" aria-role="button">
+                <image class="icon icon-sm icon-before" src="/assets/icons/{{item.done ? 'undo' : 'check'}}-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>{{item.done ? '恢复提醒' : '标记完成'}}</text>
               </view>
-              <view wx:if="{{item.calendarAddedAt || item.calendarPendingAt || (!item.done && !item.overdue)}}"
-                class="button button-small button-soft reminder-action" data-id="{{item.id}}"
-                hover-class="is-pressed" bindtap="addToCalendar" aria-role="button">
-                <text>{{calendarPendingId === item.id ? '打开中…' : item.calendarAddedAt ? '已加入日历 · 核对' : item.calendarPendingAt ? '核对手机日历' : '加入手机日历'}}</text>
+              <view wx:if="{{item.calendarReviewRequired || item.calendarAddedAt || item.calendarPendingAt || (!item.done && !item.overdue)}}"
+                class="button button-small button-secondary reminder-action" data-id="{{item.id}}"
+                hover-class="is-pressed" catchtap="addToCalendar" aria-role="button">
+                <image class="icon icon-sm icon-before" src="/assets/icons/calendar-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>{{calendarPendingId === item.id ? '打开中…' : item.calendarReviewRequired ? '核对手机日历' : item.calendarAddedAt ? '已加入日历 · 核对' : item.calendarPendingAt ? '核对手机日历' : '加入手机日历'}}</text>
               </view>
-              <view wx:if="{{item.link}}" class="button button-small button-soft reminder-action" data-id="{{item.id}}" hover-class="is-pressed"
-                bindtap="copyReminderLink" aria-role="button"><text>复制链接</text></view>
-              <view class="button button-small button-danger reminder-action" data-id="{{item.id}}" hover-class="is-pressed" bindtap="deleteReminder"
-                aria-role="button"><text>删除</text></view>
+              <view wx:if="{{item.link}}" class="button button-small button-secondary reminder-action" data-id="{{item.id}}" hover-class="is-pressed"
+                catchtap="copyReminderLink" aria-role="button"><image class="icon icon-sm icon-before" src="/assets/icons/link-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>复制链接</text></view>
+              <view class="button button-small button-danger reminder-action" data-id="{{item.id}}" hover-class="is-pressed" catchtap="deleteReminder"
+                aria-role="button"><image class="icon icon-sm icon-before" src="/assets/icons/trash-danger.svg" mode="aspectFit" aria-hidden="true"></image><text>删除</text></view>
             </view>
           </view>
         </view>
@@ -124,31 +135,45 @@
         <view class="section">
           <view class="section-head">
             <text class="title">面试复盘</text>
-            <view class="button button-small button-soft" hover-class="is-pressed" bindtap="openReview" aria-role="button"><text>＋ 记复盘</text></view>
+            <view class="button button-small button-soft" hover-class="is-pressed" bindtap="openReview" aria-role="button">
+              <image class="icon icon-sm icon-before" src="/assets/icons/plus-primary.svg" mode="aspectFit" aria-hidden="true"></image><text>记复盘</text>
+            </view>
           </view>
-          <view wx:if="{{!reviews.length}}" class="surface panel"><text class="muted">把面试问题、回答和下次想改进的地方记下来。</text></view>
-          <view wx:for="{{reviews}}" wx:key="id" class="surface panel detail-review" data-id="{{item.id}}" hover-class="card-pressed" bindtap="openReview" aria-role="button">
-            <view class="row-between">
+          <view wx:if="{{!reviews.length}}" class="surface panel detail-empty"><text class="muted">把面试问题、回答和下次想改进的地方记下来。</text></view>
+          <view wx:for="{{reviews}}" wx:key="id" class="surface detail-review" data-id="{{item.id}}" hover-class="card-pressed" bindtap="openReview" aria-role="button" aria-label="{{item.round}}复盘，自评 {{item.score}} 分，满分 5 分">
+            <view class="row">
               <view class="grow detail-review-copy">
                 <text class="detail-review-round">{{item.round}}</text>
-                <text class="muted">{{item.dateLabel}} · {{item.questionCount}} 道题</text>
+                <text class="subtle">{{item.dateLabel}} · {{item.questionCount}} 道题</text>
               </view>
-              <text class="link">★ {{item.score}}/5 ›</text>
+              <view class="row detail-review-score">
+                <image class="icon icon-sm" src="/assets/icons/star-warm.svg" mode="aspectFit" aria-hidden="true"></image>
+                <text class="detail-review-score-text">{{item.score}}/5</text>
+              </view>
+              <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
             </view>
           </view>
         </view>
 
         <view class="section">
-          <view class="section-head"><text class="title">进度时间线</text></view>
+          <view class="section-head">
+            <text class="title">进度时间线</text>
+            <view class="button button-small {{timelineManaging ? 'button-soft' : 'button-secondary'}} timeline-manage" hover-class="is-pressed" bindtap="toggleTimelineManagement" aria-role="button" aria-label="{{timelineManaging ? '完成时间线管理' : '管理时间线'}}"><text>{{timelineManaging ? '完成' : '管理'}}</text></view>
+          </view>
+          <text wx:if="{{timelineManaging}}" class="callout timeline-help">删除不会改变当前投递状态；相关历史统计可能随之更新。</text>
           <view class="surface panel">
+            <text wx:if="{{!timeline.length}}" class="muted">暂无时间线记录</text>
             <view wx:for="{{timeline}}" wx:key="key" class="timeline-row {{index ? 'timeline-row-separated' : ''}}">
               <view class="timeline-dot" style="background-color: {{item.color}};"></view>
               <view class="grow timeline-content">
-                <view class="row-between">
+                <view class="row-between timeline-head">
                   <text class="timeline-status" style="color: {{item.color}};">{{item.label}}</text>
-                  <text class="muted timeline-time">{{item.timeLabel}}</text>
+                  <text class="subtle timeline-time">{{item.timeLabel}}</text>
                 </view>
                 <text wx:if="{{item.note}}" class="muted timeline-note">{{item.note}}</text>
+              </view>
+              <view wx:if="{{timelineManaging}}" class="timeline-delete" data-key="{{item.key}}" catchtap="deleteTimeline" hover-class="is-pressed" aria-role="button" aria-label="删除{{item.label}}时间线记录" aria-disabled="{{timelineBusy}}">
+                <image class="icon icon-sm icon-before" src="/assets/icons/trash-danger.svg" mode="aspectFit" aria-hidden="true"></image><text>删除</text>
               </view>
             </view>
           </view>

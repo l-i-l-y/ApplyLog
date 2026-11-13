@@ -1,10 +1,12 @@
 
 const {
-  STATUS, STATUSES, STATUS_BY_ID, ACTIVE_STATUSES, CLOSED_STATUSES, REPLY_STATUSES,
+  STATUS, LEGACY_STATUS, STATUSES, STATUS_BY_ID, READABLE_STATUS_BY_ID, effectiveStatus,
+  ACTIVE_STATUSES, CLOSED_STATUSES, REPLY_STATUSES,
   CHANNELS, INTERVIEW_ROUNDS, REMINDER_TYPES, isDemoId
 } = require('./constants')
 const { dayStart, addDays, startOfWeek } = require('./date')
 const { buildDemo } = require('./demo')
+const { reminderFields } = require('./reminder')
 
 const STORAGE_KEY = 'applylog-data'
 const VERSION = 1
@@ -22,6 +24,12 @@ function readRaw() {
 
 function read() {
   const data = readRaw()
+  return validateData(data)
+}
+
+// Reads and imports share the same version-1 compatibility rules; validation never writes.
+function validateData(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('本地数据格式异常')
   if (data.version !== VERSION) throw new Error('本地数据版本无法读取')
   if (!Array.isArray(data.applications)) throw new Error('本地数据格式异常')
   const ids = new Set()
@@ -70,16 +78,17 @@ function uniqueItems(items, validate) {
 
 function validApplication(record) {
   return hasStrings(record, ['id', 'company', 'position']) && clean(record.id) &&
-    clean(record.company) && clean(record.position) && Boolean(STATUS_BY_ID[record.status]) &&
+    clean(record.company) && clean(record.position) && typeof record.status === 'string' && Boolean(READABLE_STATUS_BY_ID[record.status]) &&
     isTimestamp(record.appliedAt) && isTimestamp(record.createdAt) && isTimestamp(record.updatedAt) &&
     ['channel', 'city', 'salary', 'jdLink', 'note'].every(field => record[field] === undefined || typeof record[field] === 'string') &&
-    Array.isArray(record.timeline) && record.timeline.length > 0 &&
-    record.timeline.every(entry => entry && STATUS_BY_ID[entry.status] && isTimestamp(entry.time) &&
+    Array.isArray(record.timeline) &&
+    record.timeline.every(entry => entry && typeof entry.status === 'string' && READABLE_STATUS_BY_ID[entry.status] && isTimestamp(entry.time) &&
       (entry.note === undefined || typeof entry.note === 'string')) &&
     uniqueItems(record.reminders, item => REMINDER_TYPES.some(type => type.id === item.type) &&
       isTimestamp(item.time) && typeof item.done === 'boolean' &&
       ['round', 'location', 'link', 'note'].every(field => item[field] === undefined || typeof item[field] === 'string') &&
-      ['calendarAddedAt', 'calendarPendingAt'].every(field => item[field] === undefined || isTimestamp(item[field]))) &&
+      ['calendarAddedAt', 'calendarPendingAt'].every(field => item[field] === undefined || isTimestamp(item[field])) &&
+      (item.calendarReviewRequired === undefined || typeof item.calendarReviewRequired === 'boolean')) &&
     uniqueItems(record.interviews, item => INTERVIEW_ROUNDS.includes(item.round) && isTimestamp(item.date) &&
       Number.isInteger(item.selfScore) && item.selfScore >= 1 && item.selfScore <= 5 &&
       (item.reflection === undefined || typeof item.reflection === 'string') &&
@@ -113,7 +122,7 @@ function filterApplications(applications, { query = '', status = 'all' } = {}) {
   const matchingStatuses = status === 'active' ? ACTIVE_STATUSES
     : status === 'closed' ? CLOSED_STATUSES : [status]
   return applications.filter(record => {
-    if (status !== 'all' && !matchingStatuses.includes(record.status)) return false
+    if (status !== 'all' && !matchingStatuses.includes(effectiveStatus(record.status))) return false
     return !needle || record.company.toLowerCase().includes(needle) || record.position.toLowerCase().includes(needle)
   }).sort((a, b) => b.appliedAt - a.appliedAt || b.createdAt - a.createdAt)
 }
@@ -177,14 +186,18 @@ function changeStatus(id, status, note = '') {
   return updateRecord(id, (record, now) => statusChanges(record, status, note, now))
 }
 
+function removeTimelineEntry(id, target) {
+  return updateRecord(id, record => {
+    if (!target || !Number.isInteger(target.index) || target.index < 0 || target.index >= record.timeline.length ||
+        target.fingerprint !== JSON.stringify(record.timeline)) {
+      throw new Error('时间线已更新，请重新选择要删除的记录')
+    }
+    return { timeline: record.timeline.filter((entry, index) => index !== target.index) }
+  })
+}
+
 function addReminder(id, input) {
-  const { type, time } = input
-  if (!REMINDER_TYPES.some(option => option.id === type)) throw new Error('请选择提醒类型')
-  if (!isTimestamp(time) || time <= Date.now()) throw new Error('请选择未来的提醒时间')
-  const reminder = {
-    id: makeId(), type, time, round: type === 'interview' ? clean(input.round) : '',
-    location: clean(input.location), link: clean(input.link), note: clean(input.note), done: false
-  }
+  const reminder = { id: makeId(), ...reminderFields(input), done: false }
   updateRecord(id, record => ({ reminders: record.reminders.concat(reminder) }))
   return reminder
 }
@@ -206,13 +219,19 @@ function toggleReminder(id, reminderId) {
   return changeReminder(id, reminderId, reminder => ({ ...reminder, done: !reminder.done }))
 }
 
+function updateReminder(id, reminderId, patch) {
+  return changeReminder(id, reminderId, previous => ({
+    ...previous, ...reminderFields({ ...previous, ...patch }, previous)
+  }))
+}
+
 function removeReminder(id, reminderId) {
   changeReminder(id, reminderId, () => null)
 }
 
 function markReminderCalendar(id, reminderId) {
   return changeReminder(id, reminderId, reminder => {
-    const { calendarPendingAt, ...rest } = reminder
+    const { calendarPendingAt, calendarReviewRequired, ...rest } = reminder
     return { ...rest, calendarAddedAt: Date.now() }
   })
 }
@@ -226,7 +245,7 @@ function setReminderCalendarPending(id, reminderId, pending) {
 
 function clearReminderCalendar(id, reminderId) {
   return changeReminder(id, reminderId, reminder => {
-    const { calendarPendingAt, calendarAddedAt, ...rest } = reminder
+    const { calendarPendingAt, calendarAddedAt, calendarReviewRequired, ...rest } = reminder
     return rest
   })
 }
@@ -267,8 +286,11 @@ function summarize(applications, now) {
   let replyCount = 0
   let offerCount = 0
   let demoCount = 0
+  let pendingStatusCount = 0
   applications.forEach(record => {
-    counts[record.status] += 1
+    const status = effectiveStatus(record.status)
+    if (status === LEGACY_STATUS.WITHDRAWN) pendingStatusCount += 1
+    else counts[status] += 1
     if (isDemoId(record.id)) demoCount += 1
     if (record.appliedAt >= monday && record.appliedAt < tomorrow) weekAdded += 1
     const history = [record.status, ...record.timeline.map(entry => entry.status)]
@@ -277,7 +299,7 @@ function summarize(applications, now) {
   })
   const total = applications.length
   return {
-    total, counts, weekAdded, replyCount, offerCount, demoCount,
+    total, counts, weekAdded, replyCount, offerCount, demoCount, pendingStatusCount,
     replyRate: total ? Math.round(replyCount * 100 / total) : 0,
     offerRate: total ? Math.round(offerCount * 100 / total) : 0
   }
@@ -297,6 +319,40 @@ function reminderSchedule(applications, now) {
   upcoming.sort((a, b) => a.time - b.time)
   overdue.sort((a, b) => b.time - a.time)
   return { upcoming, overdue }
+}
+
+function questionBook(applications, query = '') {
+  const all = []
+  let reviewCount = 0
+  for (const record of applications) {
+    for (const review of record.interviews) {
+      const questions = review.questions.map((question, questionIndex) => ({ question, questionIndex }))
+        .filter(({ question }) => clean(question.q))
+      if (!questions.length) continue
+      reviewCount += 1
+      // 题目没有持久化 ID。key 只在原复盘的问题数组未改动期间代表同一道题；
+      // 完整数组指纹负责使编辑/删除前序题后的旧阅读状态失效，包括完全重复的题。
+      const sourceFingerprint = JSON.stringify(review.questions)
+      for (const { question, questionIndex } of questions) {
+        all.push({
+          key: JSON.stringify([record.id, review.id, questionIndex]),
+          sourceFingerprint,
+          applicationId: record.id, reviewId: review.id, questionIndex,
+          q: question.q, myAnswer: question.myAnswer,
+          company: record.company, position: record.position,
+          round: review.round, date: review.date, demo: isDemoId(record.id)
+        })
+      }
+    }
+  }
+  const compareId = (a, b) => a < b ? -1 : a > b ? 1 : 0
+  // 同日按来源 ID 升序，再按复盘内题序；不依赖存储数组的排列。
+  all.sort((a, b) => dayStart(b.date) - dayStart(a.date) ||
+    compareId(a.applicationId, b.applicationId) || compareId(a.reviewId, b.reviewId) || a.questionIndex - b.questionIndex)
+  const needle = clean(query).toLowerCase()
+  const items = needle ? all.filter(item => [item.q, item.company, item.position]
+    .some(value => value.toLowerCase().includes(needle))) : all
+  return { items, total: all.length, reviewCount, matched: items.length, hasQuery: Boolean(needle) }
 }
 
 function upcomingCount(applications, now) {
@@ -339,6 +395,7 @@ function snapshot(now = Date.now()) {
     list: filter => filterApplications(applications, filter),
     get: id => applications.find(record => record.id === id) || null,
     stats: () => summarize(applications, now),
+    questions: query => questionBook(applications, query),
     reminderSchedule: () => reminderSchedule(applications, now),
     upcomingCount: () => upcomingCount(applications, now),
     lastChannel: () => lastChannel(data),
@@ -389,7 +446,7 @@ function clear() {
 }
 
 module.exports = {
-  snapshot, list, get, create, update, remove, changeStatus, addReminder, toggleReminder, removeReminder,
+  snapshot, list, get, create, update, remove, changeStatus, removeTimelineEntry, addReminder, updateReminder, toggleReminder, removeReminder,
   markReminderCalendar, setReminderCalendarPending, clearReminderCalendar, addInterview, updateInterview, stats, upcoming,
-  seedDemo, removeDemo, exportData: readRaw, clear
+  seedDemo, removeDemo, exportData: readRaw, validateData, clear
 }

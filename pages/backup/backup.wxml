@@ -1,0 +1,41 @@
+<view class="page-shell">
+  <view class="page-nav"><navigation-bar title="恢复备份" background="#F4F6FA" color="#1A2338"></navigation-bar></view>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-into-view="{{preparedFileName ? 'backup-export-ready' : ''}}">
+    <view class="page-content page-content-safe">
+      <view class="surface panel">
+        <text class="title">整份恢复本机数据</text>
+        <text class="muted backup-copy">从微信聊天中选择 JSON 备份。支持 ApplyLog 新备份和旧版完整 JSON；不合并、不自动去重。</text>
+        <text class="muted backup-copy">单文件最多 2 MiB（兼容旧 JSON 缩进），实际数据最多 1 MiB；还需足够空间完整保留原值。不会截断内容。</text>
+        <view class="button button-primary section backup-choose" bindtap="chooseFile" hover-class="is-pressed" aria-role="button" aria-disabled="{{selecting || restoring || exporting}}"><text>{{selecting ? '正在选择并读取…' : '选择 JSON 备份'}}</text></view>
+      </view>
+      <view wx:if="{{preview}}" class="surface panel section backup-preview">
+        <text class="title">核对备份内容</text>
+        <text class="backup-copy backup-meta">备份时间：{{preview.exportedAt}}</text>
+        <text class="backup-copy backup-counts">{{preview.counts.applications}} 条投递 · {{preview.counts.reminders}} 条提醒 · {{preview.counts.interviews}} 篇复盘</text>
+        <text class="callout callout-danger backup-copy">将替换当前本机数据。确认后先保留原值回滚快照，上一份快照会被替换。</text>
+        <text class="muted backup-copy">备份包含公司、薪资、面试记录等内容，请妥善保管。它不迁移手机日历；恢复后请按“核对手机日历”检查，避免重复添加。</text>
+        <view class="button button-primary section backup-confirm" bindtap="confirmRestore" hover-class="is-pressed" aria-role="button" aria-disabled="{{restoring}}"><text>{{restoring ? '恢复中…' : '确认整份恢复'}}</text></view>
+        <view class="button button-secondary backup-cancel" bindtap="cancelPreview" hover-class="is-pressed" aria-role="button"><text>取消预览</text></view>
+      </view>
+      <view wx:if="{{error || message}}" class="section" aria-live="polite"><text class="callout {{error ? 'callout-danger' : ''}}">{{error || message}}</text></view>
+      <view wx:if="{{preparedFileName}}" id="backup-export-ready" class="surface panel section">
+        <text class="muted backup-filename">{{preparedFileName}}</text>
+        <view class="button button-primary section backup-share-file" bindtap="sharePreparedFile" hover-class="is-pressed" aria-role="button" aria-disabled="{{exporting || selecting || restoring}}"><text>分享备份文件</text></view>
+      </view>
+      <view class="surface panel section">
+        <text class="title">恢复前快照与回滚</text>
+        <text wx:if="{{rollbackError}}" class="backup-warning backup-copy">{{rollbackError}}</text>
+        <block wx:elif="{{rollback.available}}">
+          <text class="muted backup-copy">保存时间：{{rollback.createdAt}}。仅保留最近一次整份恢复前的完整原值，包括原来可能损坏的数据。</text>
+          <view class="button button-secondary section backup-export-rollback" bindtap="exportRollback" hover-class="is-pressed" aria-role="button" aria-disabled="{{exporting || selecting || restoring}}"><text>导出恢复前原值（救援）</text></view>
+          <text class="muted backup-copy">即使业务存储写入失败，也可尝试导出此原值。快照包含公司、薪资、面试记录等内容，请妥善保管。</text>
+          <text wx:if="{{rollback.alreadyCurrent}}" class="muted backup-copy">当前数据已与此快照一致，无需重复回滚。</text>
+          <view wx:else class="button button-soft section backup-rollback" bindtap="confirmRollback" hover-class="is-pressed" aria-role="button" aria-disabled="{{restoring || selecting || exporting}}"><text>回滚至恢复前</text></view>
+        </block>
+        <text wx:else class="muted backup-copy">尚无恢复前快照。确认恢复时会先可靠保存并核验；无法保留原值时停止恢复。</text>
+        <view wx:if="{{rollback.emergencyAvailable}}" class="button button-secondary section" bindtap="exportEmergency" hover-class="is-pressed" aria-role="button"><text>导出回滚前救援快照</text></view>
+        <text class="muted backup-copy">回滚快照和导出工作文件仍在小程序内，清理小程序数据时会丢失；请把长期备份存到小程序之外。</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

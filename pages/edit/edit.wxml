@@ -1,12 +1,12 @@
 
 <view class="page-shell">
   <view class="page-nav">
-    <navigation-bar title="{{pageTitle}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+    <navigation-bar title="{{pageTitle}}" delta="{{0}}" bind:back="requestLeave" loading="{{loading}}" background="#F4F6FA" color="#1A2338"></navigation-bar>
   </view>
   <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
     <view class="page-content page-content-safe">
       <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取投递信息…</text></view>
-      <empty-state wx:elif="{{error}}" title="暂时无法打开表单" description="{{error}}" action-label="重试" symbol="!" bind:action="loadRecord"></empty-state>
+      <empty-state wx:elif="{{error}}" title="暂时无法打开表单" description="{{error}}" action-label="重试" icon="alert-danger" bind:action="loadRecord"></empty-state>
       <block wx:else>
         <view class="surface panel">
           <view class="row-between"><text class="title">投递信息</text><text wx:if="{{demo}}" class="demo-pill">示例</text></view>
@@ -32,14 +32,14 @@
         <view class="surface panel section">
           <view class="row-between more-toggle" hover-class="is-pressed" bindtap="toggleMore" aria-role="button">
             <text class="title">更多信息</text>
-            <text class="link">{{expanded ? '收起' : '展开'}}</text>
+            <view class="row text-action"><text>{{expanded ? '收起' : '展开'}}</text><image class="icon icon-sm icon-after {{expanded ? 'more-open' : ''}}" src="/assets/icons/chevron-down-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view>
           </view>
           <text wx:if="{{!expanded}}" class="muted more-summary">投递日期 {{form.date}}{{form.channel ? ' · ' + form.channel : ' · 可补充渠道、地点和备注'}}</text>
           <block wx:else>
             <view class="field">
               <text class="field-label">投递日期</text>
               <picker mode="date" value="{{form.date}}" end="{{today}}" bindchange="pickDate">
-                <view class="field-picker {{errors.date ? 'field-invalid' : ''}}"><text>{{form.date}}</text><text class="subtle">›</text></view>
+                <view class="field-picker {{errors.date ? 'field-invalid' : ''}}"><text>{{form.date}}</text><image class="icon icon-sm" src="/assets/icons/calendar-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view>
               </picker>
               <text wx:if="{{errors.date}}" class="field-error">请选择有效的投递日期</text>
             </view>
@@ -60,9 +60,9 @@
             <view class="field">
               <text class="field-label">薪资</text>
               <picker mode="selector" range="{{salaryOptions}}" value="{{salaryIndex}}" bindchange="pickSalary" aria-label="薪资选择">
-                <view class="field-picker"><text>{{salaryOptions[salaryIndex]}}</text><text class="subtle">›</text></view>
+                <view class="field-picker"><text>{{salaryOptions[salaryIndex]}}</text><image class="icon icon-sm" src="/assets/icons/chevron-down-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view>
               </picker>
-              <text class="muted salary-hint">预设区间为税前月薪，K = 千元人民币</text>
+              <text class="subtle salary-hint">预设区间为税前月薪，K = 千元人民币</text>
               <input wx:if="{{salaryCustom}}" id="edit-salary" data-anchor="edit-salary" class="field-input salary-custom" value="{{form.salary}}" data-field="salary" placeholder="例如：年薪30万 · 16薪" maxlength="40" aria-label="自定义薪资，最多40字" bindinput="onInput" focus="{{focusField === 'salary'}}"
                 bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight" confirm-type="next" confirm-hold="{{true}}" data-next="jdLink" bindconfirm="focusNext" />
             </view>

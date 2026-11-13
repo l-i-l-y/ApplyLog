@@ -1,0 +1,50 @@
+<view class="page-shell">
+  <view class="page-nav"><navigation-bar title="编辑提醒" delta="{{0}}" bind:back="requestLeave" loading="{{loading}}" background="#F4F6FA" color="#1A2338"></navigation-bar></view>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
+    <view class="page-content form-content">
+      <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取提醒…</text></view>
+      <empty-state wx:elif="{{error}}" icon="alert-danger" title="暂时无法编辑提醒" description="{{error}}" action-label="重试" bind:action="loadReminder"></empty-state>
+      <block wx:else>
+        <view wx:if="{{calendarNotice}}" class="callout reminder-calendar-notice"><text>修改仅影响小程序，手机日历中的事件需手动核对和修改。</text></view>
+        <view class="surface panel">
+          <view class="row-wrap">
+            <view wx:for="{{reminderTypes}}" wx:key="id" class="chip {{form.type === item.id ? 'chip-selected' : ''}}" data-type="{{item.id}}" bindtap="changeType" hover-class="is-pressed" aria-role="button"><text>{{item.label}}</text></view>
+          </view>
+          <view class="reminder-edit-pair">
+            <view class="field reminder-edit-half">
+              <text class="field-label">日期</text>
+              <picker mode="date" value="{{form.date}}" bindchange="pickDate"><view class="field-picker {{timeError ? 'field-invalid' : ''}}"><text>{{form.date}}</text><image class="icon icon-sm" src="/assets/icons/calendar-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view></picker>
+            </view>
+            <view class="field reminder-edit-half reminder-edit-second">
+              <text class="field-label">时间</text>
+              <picker mode="time" value="{{form.time}}" bindchange="pickTime"><view class="field-picker {{timeError ? 'field-invalid' : ''}}"><text>{{form.time}}</text><image class="icon icon-sm" src="/assets/icons/clock-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view></picker>
+            </view>
+          </view>
+          <text wx:if="{{timeError}}" class="field-error">{{timeError}}</text>
+          <text class="muted reminder-time-help">保留原时间可编辑历史提醒；更改时间后须选择未来时间。</text>
+          <view wx:if="{{form.type === 'interview'}}" class="field">
+            <text class="field-label">面试轮次</text>
+            <picker mode="selector" range="{{roundLabels}}" value="{{form.roundIndex}}" bindchange="pickRound"><view class="field-picker"><text>{{roundLabels[form.roundIndex]}}</text><image class="icon icon-sm" src="/assets/icons/chevron-down-subtle.svg" mode="aspectFit" aria-hidden="true"></image></view></picker>
+          </view>
+          <view class="field">
+            <text class="field-label">地点</text>
+            <input id="reminder-edit-location" data-anchor="reminder-edit-location" data-field="location" class="field-input" value="{{form.location}}" placeholder="选填" maxlength="{{limits.location}}" aria-label="提醒地点" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur" bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onInput" />
+          </view>
+          <view class="field">
+            <text class="field-label">链接</text>
+            <input id="reminder-edit-link" data-anchor="reminder-edit-link" data-field="link" class="field-input" value="{{form.link}}" placeholder="粘贴会议链接（选填）" maxlength="{{limits.link}}" aria-label="提醒链接" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur" bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onInput" />
+          </view>
+          <view class="field">
+            <text class="field-label">提醒备注</text>
+            <textarea id="reminder-edit-note" data-anchor="reminder-edit-note" data-field="note" class="field-textarea" style="max-height: {{keyboardInputMaxHeight}}px;" value="{{form.note}}" placeholder="要提前准备什么？" maxlength="{{limits.note}}" aria-label="提醒备注" adjust-position="{{false}}" hold-keyboard="{{true}}" cursor-spacing="12" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur" bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onInput"></textarea>
+          </view>
+        </view>
+      </block>
+    </view>
+  </scroll-view>
+  <view wx:if="{{!loading && !error}}" class="form-actions reminder-edit-actions {{keyboardHeight ? 'keyboard-actions' : ''}}">
+    <view class="button button-secondary reminder-edit-cancel" hover-class="is-pressed" bindtap="cancelEdit" aria-role="button"><text>取消</text></view>
+    <view class="button button-primary grow" hover-class="is-pressed" bindtap="saveReminder" aria-role="button" aria-disabled="{{saving}}"><text>{{saving ? '保存中…' : returnOnly ? '返回详情' : '保存修改'}}</text></view>
+  </view>
+  <view wx:if="{{keyboardHeight}}" class="keyboard-space" style="height: {{keyboardInset}}px;" aria-hidden="true"></view>
+</view>

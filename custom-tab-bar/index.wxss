@@ -1,0 +1,53 @@
+.tab-host {
+  /* 固定子节点不撑高宿主，需保留布局范围才能在 Skyline 中命中底栏。 */
+  height: 100vh;
+  pointer-events: none;
+}
+/* 组件内颜色与 app.wxss 令牌保持一致：surface / line / subtle / primary-strong / danger。 */
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  pointer-events: auto;
+  background-color: #FFFFFF;
+  box-shadow: 0 -1px 0 #E6E9F0;
+}
+.tab-items { display: flex; flex-direction: row; height: 58px; }
+.tab-item {
+  flex: 1;
+  min-width: 0;
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #636D84;
+}
+.tab-icon-wrap { position: relative; width: 24px; height: 24px; }
+.tab-icon { display: block; width: 24px; height: 24px; }
+/* 选中态只改变颜色与字重，字号和行高不变，切换时不跳动。 */
+.tab-label { margin-top: 3px; font-size: 12px; line-height: 16px; font-weight: 500; }
+.tab-selected { color: #2E47BA; }
+.tab-selected .tab-label { font-weight: 650; }
+.tab-pressed { opacity: .7; }
+.tab-badge {
+  position: absolute;
+  left: 16px;
+  top: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #FFFFFF;
+  border-radius: 9px;
+  background-color: #B03A50;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 14px;
+  text-align: center;
+}

@@ -1,4 +1,5 @@
 const { keyboardPage, keyboardData } = require('../../utils/keyboard')
+const { leaveGuard } = require('../../utils/leave-guard')
 
 const store = require('../../utils/store')
 const { INTERVIEW_ROUNDS, isDemoId } = require('../../utils/constants')
@@ -7,6 +8,7 @@ const { returnToPrevious, toast } = require('../../utils/ui')
 
 Page({
   ...keyboardPage,
+  ...leaveGuard,
   data: {
     ...keyboardData,
     loading: true,
@@ -37,9 +39,15 @@ Page({
     this.loadReview()
   },
 
-  onHide() { this.stopKeyboard() },
+  onHide() { this.stopKeyboard(); this.suspendLeaveGuard() },
 
-  onUnload() { this.stopKeyboard() },
+  onUnload() { this.stopKeyboard(); this.suspendLeaveGuard() },
+
+  editSnapshot() {
+    const form = this.data.form
+    return { round: INTERVIEW_ROUNDS[form.roundIndex], date: form.date, reflection: form.reflection || '', selfScore: form.selfScore,
+      questions: form.questions.filter(item => item.q.trim() || item.myAnswer.trim()).map(({ q, myAnswer }) => ({ q, myAnswer })) }
+  },
 
   loadReview() {
     if (!this.initialized) this.setData({ loading: true, error: '' })
@@ -49,7 +57,7 @@ Page({
       if (!record || (this.reviewId && !review)) {
         const message = record ? '这篇面试复盘已不存在' : '这条投递记录已不存在'
         this.setData({ loading: false, error: message })
-        returnToPrevious(message, 'none')
+        if (!this.initialized) returnToPrevious(message, 'none')
         return
       }
       const today = toDateInput(Date.now())
@@ -64,7 +72,7 @@ Page({
         } : { roundIndex: 0, date: today, questions: [this.makeQuestion()], reflection: '', selfScore: 0 }
         this.initialized = true
       }
-      this.setData(changes)
+      this.setData(changes, () => this.beginLeaveGuard())
     } catch (error) {
       this.setData({ loading: false, error: error.message })
     }
@@ -77,22 +85,22 @@ Page({
   },
 
   pickRound(event) {
-    this.setData({ 'form.roundIndex': Number(event.detail.value) })
+    this.setData({ 'form.roundIndex': Number(event.detail.value) }, () => this.refreshLeaveGuard())
   },
 
   pickDate(event) {
-    this.setData({ 'form.date': event.detail.value, 'errors.date': false })
+    this.setData({ 'form.date': event.detail.value, 'errors.date': false }, () => this.refreshLeaveGuard())
   },
 
   onQuestionInput(event) {
     const { index, field } = event.currentTarget.dataset
     const changes = { ['form.questions[' + index + '].' + field]: event.detail.value }
     if (field === 'q' && Number(index) === this.data.errors.questionIndex) changes['errors.questionIndex'] = -1
-    this.setData(changes, () => this.ensureKeyboardField())
+    this.setData(changes, () => this.afterFormChange())
   },
 
   addQuestion() {
-    this.setData({ 'form.questions': this.data.form.questions.concat(this.makeQuestion()) }, () => this.ensureKeyboardField())
+    this.setData({ 'form.questions': this.data.form.questions.concat(this.makeQuestion()) }, () => this.afterFormChange())
   },
 
   removeQuestion(event) {
@@ -105,15 +113,15 @@ Page({
     this.setData({
       'form.questions': this.data.form.questions.filter((_item, position) => position !== index),
       'errors.questionIndex': -1
-    }, () => this.ensureKeyboardField())
+    }, () => this.afterFormChange())
   },
 
   onReflection(event) {
-    this.setData({ 'form.reflection': event.detail.value }, () => this.ensureKeyboardField())
+    this.setData({ 'form.reflection': event.detail.value }, () => this.afterFormChange())
   },
 
   selectScore(event) {
-    this.setData({ 'form.selfScore': Number(event.currentTarget.dataset.score), 'errors.score': false })
+    this.setData({ 'form.selfScore': Number(event.currentTarget.dataset.score), 'errors.score': false }, () => this.refreshLeaveGuard())
   },
 
   saveReview() {
@@ -139,8 +147,17 @@ Page({
         questions: form.questions.map(({ key, q, myAnswer }) => ({ ...this.originalQuestions.get(key), q, myAnswer })),
         reflection: form.reflection, selfScore: form.selfScore
       }
-      if (this.reviewId) store.updateInterview(this.applicationId, this.reviewId, payload)
-      else this.reviewId = store.addInterview(this.applicationId, payload).id
+      const signature = this.formSignature()
+      if (this.lastSavedSignature !== signature) {
+        if (this.reviewId) store.updateInterview(this.applicationId, this.reviewId, payload)
+        else this.reviewId = store.addInterview(this.applicationId, payload).id
+        this.lastSavedSignature = signature
+      } else {
+        const current = store.get(this.applicationId)
+        if (!current || !current.interviews.some(item => item.id === this.reviewId)) throw new Error('这篇面试复盘已不存在')
+      }
+      this.markFormSaved()
+      this.releaseKeyboard()
       this.setData({ title: '编辑面试复盘' })
     } catch (error) {
       this.setData({ saving: false })

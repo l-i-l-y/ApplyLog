@@ -1,0 +1,12 @@
+<view class="page-shell">
+  <view class="page-nav"><navigation-bar title="{{title}}" background="#F4F6FA" color="#1A2338"></navigation-bar></view>
+  <scroll-view class="page-scroll" type="list" scroll-y>
+    <view class="page-content page-content-safe">
+      <view class="surface panel"><text class="title">使用前请了解</text><text wx:for="{{guide}}" wx:key="*this" class="paragraph help-paragraph">{{item}}</text></view>
+      <view class="surface panel section"><text class="title">隐私与数据说明</text><text wx:for="{{privacy}}" wx:key="*this" class="paragraph help-paragraph">{{item}}</text>
+        <view wx:if="{{canOpenPrivacy}}" class="button button-soft section" bindtap="openPrivacy" hover-class="is-pressed" aria-role="button"><text>查看微信隐私保护指引</text></view>
+      </view>
+      <view class="surface panel section"><text class="title">当前版本</text><text class="paragraph help-paragraph">V{{version.version}} · {{version.environment}}</text><text class="paragraph help-paragraph">开发版、体验版显示代码维护版本；正式版优先显示微信运行环境提供的版本。版本信息不代表审核或发布已完成。</text></view>
+    </view>
+  </scroll-view>
+</view>

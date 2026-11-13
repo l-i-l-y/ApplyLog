@@ -1,0 +1,6 @@
+.backup-copy { display: block; margin-top: 16rpx; }
+.backup-meta { color: var(--muted); font-size: var(--text-secondary); }
+.backup-counts { color: var(--ink); font-size: var(--text-body); font-weight: 650; }
+.backup-warning { color: var(--danger); }
+.backup-cancel { margin-top: 20rpx; }
+.backup-filename { word-break: break-all; }

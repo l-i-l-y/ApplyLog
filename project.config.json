@@ -26,6 +26,10 @@
   "packOptions": {
     "ignore": [
       {
+        "value": "docs",
+        "type": "folder"
+      },
+      {
         "value": "tests",
         "type": "folder"
       },

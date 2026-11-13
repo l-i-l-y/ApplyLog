@@ -9,18 +9,23 @@ const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringi
 
 function environment(now = new Date(2026, 10, 13, 10).getTime()) {
   let stored = ''
+  const auxiliary = new Map()
   const calls = { reads: 0, writes: 0, toasts: [], modals: [], badges: [], calendar: [], sheets: [] }
   const wx = {
-    getStorageSync: () => {
+    getStorageSync: key => {
+      if (key !== 'applylog-data') return clone(auxiliary.get(key) ?? '')
       calls.reads += 1
       if (calls.readError) throw new Error('read failure')
       return clone(stored)
     },
-    setStorageSync: (_key, value) => {
+    setStorageSync: (key, value) => {
       if (calls.writeError) throw new Error('disk full')
+      if (key !== 'applylog-data') { auxiliary.set(key, clone(value)); return }
       stored = clone(value)
       calls.writes += 1
     },
+    removeStorageSync: key => { if (key === 'applylog-data') stored = ''; else auxiliary.delete(key) },
+    getStorageInfoSync: () => ({ keys: [...(stored === '' ? [] : ['applylog-data']), ...auxiliary.keys()], currentSize: 10, limitSize: 10240 }),
     showToast: options => calls.toasts.push(options),
     showModal: options => calls.modals.push(options),
     showActionSheet: options => calls.sheets.push(options),
@@ -68,6 +73,7 @@ function environment(now = new Date(2026, 10, 13, 10).getTime()) {
     instance.onShow()
     return instance
   }
+  load('utils/tabbar.js').subscribeTabBar(state => calls.badges.push(state.badge))
   return {
     store: load('utils\\store.js'), date: load('utils\\date.js'), page, wx, calls, now,
     raw: () => clone(stored), inject: value => { stored = clone(value) },
@@ -88,15 +94,15 @@ test('empty state, create/edit/restart, search and all status groups', () => {
   env.store.update(record.id, { company: 'Long company name', position: 'Senior Engineer' })
   assert.equal(env.restart().get(record.id).company, 'Long company name')
   assert.equal(env.store.list({ query: ' SENIOR ' }).length, 1)
-  for (const status of ['submitted', 'assessment', 'interview', 'offer', 'rejected', 'withdrawn']) {
+  for (const status of ['submitted', 'interview', 'offer', 'rejected']) {
     env.store.changeStatus(record.id, status)
     assert.equal(env.store.list({ status }).length, 1)
-    assert.equal(env.store.list({ status: 'active' }).length, ['submitted', 'assessment', 'interview'].includes(status) ? 1 : 0)
-    assert.equal(env.store.list({ status: 'closed' }).length, ['rejected', 'withdrawn'].includes(status) ? 1 : 0)
+    assert.equal(env.store.list({ status: 'active' }).length, ['submitted', 'interview'].includes(status) ? 1 : 0)
+    assert.equal(env.store.list({ status: 'closed' }).length, ['offer', 'rejected'].includes(status) ? 1 : 0)
   }
   home.onShow()
   assert.equal(home.data.total, 1)
-  assert.equal(home.data.distribution.find(item => item.id === 'withdrawn').count, 1)
+  assert.equal(home.data.distribution.find(item => item.id === 'rejected').count, 1)
 })
 
 test('required fields, future/invalid dates and duplicate save', () => {
@@ -124,14 +130,17 @@ test('same status is a no-op; historical reply and Offer survive later changes',
   assert.equal(env.store.get(record.id).timeline.length, 1)
   env.store.changeStatus(record.id, 'interview', 'reply')
   env.store.changeStatus(record.id, 'offer')
-  env.store.changeStatus(record.id, 'withdrawn')
+  const legacy = env.raw()
+  legacy.applications[0].status = 'withdrawn'
+  legacy.applications[0].timeline.push({ status: 'withdrawn', time: env.now, note: '' })
+  env.inject(legacy)
   const summary = env.store.stats()
   assert.equal(summary.replyCount, 1)
   assert.equal(summary.offerCount, 1)
   assert.equal(summary.replyRate, 100)
-  assert.equal(summary.counts.withdrawn, 1)
+  assert.equal(summary.pendingStatusCount, 1)
   const detail = env.page('detail', { id: record.id })
-  assert.equal(detail.data.timeline[0].label, '已放弃')
+  assert.equal(detail.data.timeline[0].label, '历史：已放弃')
   const mine = env.page('mine')
   assert.equal(mine.data.summary.offerRate, 100)
 })
@@ -582,6 +591,67 @@ test('shared small text and status labels meet 4.5:1 color contrast', () => {
   for (const status of STATUSES) check(status.color, status.background)
 })
 
+function templates() {
+  const files = []
+  for (const dir of ['pages', 'components', 'custom-tab-bar']) {
+    const walk = folder => fs.readdirSync(folder, { withFileTypes: true }).forEach(entry => {
+      const full = path.join(folder, entry.name)
+      if (entry.isDirectory()) walk(full)
+      else if (entry.name.endsWith('.wxml')) files.push({ file: path.relative(root, full), text: fs.readFileSync(full, 'utf8') })
+    })
+    walk(path.join(root, dir))
+  }
+  return files
+}
+
+test('icon references resolve to local SVGs and no icon file is left unused', () => {
+  const used = new Set()
+  for (const { file, text } of templates()) {
+    for (const [, src] of text.matchAll(/\/assets\/icons\/([^"]+?)\.svg/g)) {
+      const dynamic = src.match(/^(.*)\{\{[^}]*\?\s*'([^']+)'\s*:\s*'([^']+)'\s*\}\}(.*)$/)
+      if (dynamic) [dynamic[2], dynamic[3]].forEach(name => used.add(dynamic[1] + name + dynamic[4]))
+      else if (src === '{{icon}}') assert.match(file, /empty-state/)
+      else { assert.doesNotMatch(src, /\{\{/, file + ' uses an unresolvable icon expression'); used.add(src) }
+    }
+    for (const [, name] of text.matchAll(/<empty-state\b[^>]*\bicon="([^"]+)"/g)) used.add(name)
+  }
+  const emptyDefault = fs.readFileSync(path.join(root, 'components/empty-state/empty-state.js'), 'utf8').match(/icon:\s*\{[^}]*value:\s*'([^']+)'/)
+  used.add(emptyDefault[1])
+  const available = fs.readdirSync(path.join(root, 'assets/icons')).map(name => name.replace(/\.svg$/, ''))
+  for (const name of used) assert.ok(available.includes(name), 'missing icon ' + name)
+  for (const name of available) assert.ok(used.has(name), 'unused icon ' + name)
+  const { TABS } = require('..\\utils\\tabbar')
+  for (const tab of TABS) for (const suffix of ['', '-selected']) {
+    const svg = fs.readFileSync(path.join(root, 'assets/tabbar', tab.icon + suffix + '.svg'), 'utf8')
+    assert.match(svg, /viewBox="0 0 24 24"/)
+    assert.doesNotMatch(svg, /<style|href=|<image/)
+  }
+})
+
+test('templates use the shared icon set instead of glyphs and keep accessible names and nested-tap guards', () => {
+  const byName = Object.fromEntries(templates().map(({ file, text }) => [file.replace(/\\/g, '/'), text]))
+  for (const [file, text] of Object.entries(byName)) {
+    assert.doesNotMatch(text, /[＋×›★☆◷✉⌕✦]|···/u, file + ' still contains a glyph icon')
+    for (const [tag] of text.matchAll(/<view\b[^>]*class="[^"]*\bicon-button\b[^"]*"[^>]*>/g)) assert.match(tag, /aria-label="[^"]+"/, file + ': ' + tag)
+  }
+  const nested = {
+    'components/app-card/app-card.wxml': ['openMenu'],
+    'pages/detail/detail.wxml': ['toggleReminder', 'addToCalendar', 'copyReminderLink', 'deleteReminder', 'deleteTimeline'],
+    'pages/questions/questions.wxml': ['toggleAnswer']
+  }
+  for (const [file, handlers] of Object.entries(nested)) {
+    for (const handler of handlers) {
+      assert.match(byName[file], new RegExp('catchtap="' + handler + '"'), file + ' ' + handler)
+      assert.doesNotMatch(byName[file], new RegExp('bindtap="' + handler + '"'), file + ' ' + handler)
+    }
+  }
+  const tabCss = fs.readFileSync(path.join(root, 'custom-tab-bar/index.wxss'), 'utf8')
+  assert.match(tabCss, /\.tab-host\s*\{[^}]*height:\s*100vh;[^}]*pointer-events:\s*none;/)
+  assert.match(tabCss, /\.tab-bar\s*\{[^}]*pointer-events:\s*auto;/)
+  assert.match(tabCss, /\.tab-items\s*\{[^}]*height:\s*58px;/)
+  assert.match(tabCss, /\.tab-icon\s*\{[^}]*width:\s*24px;\s*height:\s*24px;/)
+})
+
 test('review keyboard reserves space and follows the active field without losing its draft', async () => {
   const env = environment()
   const review = env.page('interview', { id: create(env).id })
@@ -621,7 +691,7 @@ test('page refreshes share one validated read and preserve the badge and status 
   }
   assert.equal(env.calls.badges.at(-1), '1')
   const raw = env.raw()
-  raw.applications[0].timeline = []
+  delete raw.applications[0].timeline
   env.inject(raw)
   const before = env.calls.reads
   const home = env.page('index')

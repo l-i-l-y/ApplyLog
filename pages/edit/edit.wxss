@@ -1,16 +1,20 @@
 
 .more-toggle {
-  min-height: 80rpx;
+  min-height: 44px;
+  margin: -8px 0;
+}
+
+.more-open {
+  transform: rotate(180deg);
 }
 
 .more-summary {
+  display: block;
   margin-top: 8rpx;
 }
 
 .salary-hint {
   margin-top: 10rpx;
-  font-size: 24rpx;
-  line-height: 1.6;
 }
 
 .salary-custom {

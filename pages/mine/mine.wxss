@@ -1,13 +1,8 @@
 
-.mine-summary {
-  background-color: #F0F3FF;
-  background-image: linear-gradient(125deg, #FFFFFF 0%, #EDF1FF 100%);
-}
-
 .mine-metrics {
   display: flex;
   flex-direction: row;
-  margin-top: 16rpx;
+  margin-top: 24rpx;
 }
 
 .mine-metric {
@@ -17,42 +12,99 @@
   min-width: 0;
 }
 
+.mine-value-row {
+  align-items: baseline;
+}
+
 .mine-value {
-  color: var(--primary-strong);
-  font-size: 40rpx;
-  font-weight: 750;
-  line-height: 1.2;
+  color: var(--ink);
+  font-size: var(--text-h1);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.mine-unit {
+  margin-left: 2px;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
 }
 
 .mine-method {
-  margin-top: 16rpx;
+  margin-top: 24rpx;
 }
 
 .mine-counts {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-top: 8rpx;
+  margin-top: 16rpx;
 }
 
 .mine-count {
   box-sizing: border-box;
   width: 50%;
-  padding: 8rpx 16rpx 8rpx 0;
+  min-height: 40px;
+  padding-right: 32rpx;
 }
 
 .mine-count-value {
   color: var(--ink);
-  font-size: 26rpx;
+  font-size: var(--text-body);
   font-weight: 650;
 }
 
+.mine-entry {
+  min-height: 64px;
+  padding: 16rpx 28rpx;
+}
+
+.mine-group-label {
+  margin: 48rpx 8rpx 16rpx;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.mine-group {
+  padding: 0 28rpx;
+}
+
+.mine-group-note {
+  display: block;
+  padding: 24rpx 0 20rpx;
+}
+
+.mine-group-footer {
+  display: block;
+  padding: 16rpx 0 24rpx;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--line);
+}
+
 .mine-setting {
-  min-height: 96rpx;
-  padding: 8rpx 0;
-  border-bottom-width: 2rpx;
-  border-bottom-style: solid;
-  border-bottom-color: var(--line);
+  min-height: 60px;
+  padding: 16rpx 0;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--line);
+}
+
+.mine-setting-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-right: 24rpx;
+  border-radius: var(--radius-sm);
+  background-color: var(--primary-soft);
+}
+
+.mine-setting-icon-danger {
+  background-color: var(--danger-soft);
 }
 
 .mine-setting-copy {
@@ -63,20 +115,80 @@
 
 .mine-setting-title {
   color: var(--ink);
-  font-size: 28rpx;
-  font-weight: 650;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .mine-danger {
   color: var(--danger);
 }
 
+.mine-brand-block {
+  display: flex;
+  flex-direction: column;
+  padding: 28rpx 0 24rpx;
+}
+
 .mine-brand {
-  margin-top: 8rpx;
   color: var(--primary-strong);
-  font-weight: 650;
+  font-size: var(--text-body);
+  font-weight: 700;
+}
+
+.mine-version {
+  margin-left: 16rpx;
 }
 
 .mine-about {
   margin-top: 8rpx;
+}
+
+.mine-question-count {
+  flex-shrink: 0;
+  margin: 0 8rpx 0 16rpx;
+}
+
+.mine-feedback {
+  width: 100%;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: transparent;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  border-radius: 0;
+  color: var(--ink);
+  font-size: var(--text-body);
+  font-weight: 400;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.mine-feedback::after {
+  border: 0;
+}
+
+.mine-feedback-note {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--line);
+}
+
+.mine-export-ready {
+  margin: 0 0 24rpx 60px;
+}
+
+.mine-file-name {
+  display: block;
+  word-break: break-all;
+}
+
+.mine-share-file {
+  margin-top: 16rpx;
+}
+
+.mine-file-message {
+  margin-bottom: 20rpx;
 }

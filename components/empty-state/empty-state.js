@@ -4,7 +4,7 @@ Component({
     title: String,
     description: String,
     actionLabel: String,
-    symbol: { type: String, value: '✦' }
+    icon: { type: String, value: 'file-text-primary' }
   },
   methods: {
     act() {

@@ -1,5 +1,6 @@
+const { setHomeBadge } = require('./tabbar')
 
-const { STATUS_BY_ID, isDemoId } = require('./constants')
+const { READABLE_STATUS_BY_ID, isDemoId } = require('./constants')
 const { formatDay, formatSchedule } = require('./date')
 
 function toast(title, icon = 'none') {
@@ -14,12 +15,12 @@ function openTab(url) {
   wx.switchTab({ url, fail: () => toast('暂时无法打开页面，请重试') })
 }
 
-function returnToPrevious(message, icon = 'success', onFailure) {
-  const success = () => toast(message, icon)
+function returnToPrevious(message, icon = 'success', onFailure, failureMessage) {
+  const success = () => { if (message) toast(message, icon) }
   const fail = error => {
     console.error('ApplyLog navigation failed', error)
     if (onFailure) onFailure()
-    toast(onFailure ? '数据已保存，但返回失败，请重试或手动返回' : '返回失败，请手动返回或重试')
+    toast(failureMessage || (onFailure ? '数据已保存，但返回失败，请重试或手动返回' : '返回失败，请手动返回或重试'))
   }
   const fallback = () => wx.switchTab({ url: '/pages/list/list', success, fail })
   if (getCurrentPages().length > 1) {
@@ -42,12 +43,7 @@ function copyText(data, message = '已复制') {
 }
 
 function updateHomeBadge(count) {
-  const fail = error => console.error('ApplyLog tab badge update failed', error)
-  if (count > 0 && typeof wx.setTabBarBadge === 'function') {
-    wx.setTabBarBadge({ index: 0, text: count > 99 ? '99+' : String(count), fail })
-  } else if (count === 0 && typeof wx.removeTabBarBadge === 'function') {
-    wx.removeTabBarBadge({ index: 0, fail })
-  }
+  setHomeBadge(count)
 }
 
 function reminderTitle(reminder) {
@@ -88,8 +84,8 @@ function applicationCard(record, now) {
 function timelineView(entry, now) {
   return {
     ...entry,
-    color: STATUS_BY_ID[entry.status].color,
-    label: STATUS_BY_ID[entry.status].label,
+    color: READABLE_STATUS_BY_ID[entry.status].color,
+    label: READABLE_STATUS_BY_ID[entry.status].label,
     timeLabel: formatSchedule(entry.time, now)
   }
 }

@@ -1,0 +1,149 @@
+.questions-header {
+  display: flex;
+  flex-direction: column;
+  padding: 16rpx 32rpx 24rpx;
+}
+
+.questions-intro {
+  font-size: var(--text-secondary);
+}
+
+.questions-search {
+  box-sizing: border-box;
+  min-height: 46px;
+  margin-top: 20rpx;
+  padding: 0 0 0 24rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--line-strong);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+}
+
+.questions-search-mark {
+  margin-right: 16rpx;
+}
+
+.questions-input {
+  height: 44px;
+  color: var(--ink);
+  font-size: var(--text-body);
+}
+
+.questions-placeholder {
+  color: var(--subtle);
+}
+
+.questions-clear {
+  margin-left: 4px;
+}
+
+.questions-summary {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32rpx;
+}
+
+.questions-summary .subtle,
+.questions-match {
+  margin-top: 4rpx;
+}
+
+.questions-row {
+  display: flex;
+  flex-direction: column;
+  margin: 0 32rpx 20rpx;
+}
+
+.question-source {
+  align-items: flex-start;
+}
+
+.question-company {
+  color: var(--ink);
+  font-size: var(--text-body);
+  font-weight: 650;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.question-source .demo-pill {
+  margin: 1px 0 0 12rpx;
+}
+
+.question-position {
+  margin-top: 2rpx;
+  font-size: var(--text-secondary);
+  word-break: break-all;
+}
+
+.question-date {
+  margin-top: 2rpx;
+  word-break: break-all;
+}
+
+.question-label {
+  margin-top: 28rpx;
+  color: var(--primary-strong);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.question-text {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8rpx;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* 空行按各自行高占位，保留用户输入的换行。 */
+.question-line {
+  display: flex;
+  flex-direction: column;
+  min-height: 25.6px;
+}
+
+.question-answer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24rpx;
+  padding: 24rpx 24rpx 8rpx;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-muted);
+}
+
+.question-answer-label {
+  color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.question-answer-text {
+  display: flex;
+  flex-direction: column;
+  margin: 8rpx 0 16rpx;
+  color: var(--ink);
+  font-size: var(--text-secondary);
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+.question-answer-text .question-line {
+  min-height: 23.8px;
+}
+
+.question-expand {
+  display: flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  margin-top: -8rpx;
+}
+
+.questions-bottom {
+  height: calc(24rpx + env(safe-area-inset-bottom));
+}

@@ -49,9 +49,12 @@ for (const page of app.pages) {
   const config = JSON.parse(fs.readFileSync(path.join(root, page + '.json'), 'utf8'))
   if (!config.usingComponents || !config.usingComponents['navigation-bar']) throw new Error('Missing navigation-bar: ' + page)
 }
-console.log('Skyline/glass-easel/requiredComponents, navigation-bar and six list scroll-views OK')
+console.log('Skyline/glass-easel/requiredComponents, navigation-bar and ' + app.pages.length + ' list scroll-views OK')
 const project = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8'))
 if (!project.packOptions.ignore.some(item => item.type === 'folder' && item.value === 'tests')) {
   throw new Error('Node-only tests must be excluded from mini-program packaging')
+}
+if (!project.packOptions.ignore.some(item => item.type === 'folder' && item.value === 'docs')) {
+  throw new Error('Development plans must be excluded from mini-program packaging')
 }
 console.log('Node tests excluded from mini-program packaging OK')

@@ -1,6 +1,6 @@
 
 <view wx:if="{{item}}" class="surface app-card {{compact ? 'app-card-compact' : ''}}">
-  <view class="row">
+  <view class="row app-card-main">
     <view class="app-card-mark" aria-hidden="true"><text>{{item.initial}}</text></view>
     <view class="grow app-card-copy">
       <view class="row app-card-name">
@@ -11,13 +11,16 @@
     </view>
     <view class="row app-card-side">
       <status-tag status="{{item.status}}"></status-tag>
-      <view wx:if="{{showMenu}}" class="app-card-menu" hover-class="is-pressed" catchtap="openMenu" aria-role="button" aria-label="更多操作">
-        <text>···</text>
+      <view wx:if="{{showMenu}}" class="icon-button app-card-menu" hover-class="is-pressed" catchtap="openMenu" aria-role="button" aria-label="更多操作">
+        <image class="icon" src="/assets/icons/more-muted.svg" mode="aspectFit" aria-hidden="true"></image>
       </view>
     </view>
   </view>
   <view wx:if="{{!compact}}" class="row-between app-card-footer">
-    <text class="muted">投递于 {{item.dateLabel}}</text>
-    <text wx:if="{{item.nextReminder}}" class="link app-card-next">{{item.nextReminder}}</text>
+    <text class="subtle app-card-date">投递于 {{item.dateLabel}}</text>
+    <view wx:if="{{item.nextReminder}}" class="row app-card-next">
+      <image class="icon icon-sm icon-before" src="/assets/icons/clock-primary.svg" mode="aspectFit" aria-hidden="true"></image>
+      <text class="app-card-next-text">{{item.nextReminder}}</text>
+    </view>
   </view>
 </view>

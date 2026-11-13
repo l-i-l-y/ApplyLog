@@ -1,0 +1,7 @@
+.reminder-edit-pair { display: flex; flex-direction: row; }
+.reminder-edit-half { flex: 1; min-width: 0; }
+.reminder-edit-second { margin-left: 20rpx; }
+.reminder-calendar-notice { margin-bottom: 24rpx; }
+.reminder-time-help { display: block; margin-top: 12rpx; }
+.reminder-edit-actions { display: flex; flex-direction: row; }
+.reminder-edit-cancel { width: 96px; margin-right: 20rpx; }

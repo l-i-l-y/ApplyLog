@@ -1,23 +1,32 @@
 
-<view class="page-shell">
+<view class="page-shell" style="height: calc(100vh - {{tabBarHeight}}px);">
   <view class="page-nav">
-    <navigation-bar title="投递有数" back="{{false}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+    <navigation-bar title="投递有数" back="{{false}}" loading="{{loading}}" background="#F4F6FA" color="#1A2338"></navigation-bar>
   </view>
   <scroll-view class="page-scroll" type="list" scroll-y>
     <view class="page-content home-content">
+      <view wx:if="{{showGuide}}" class="surface panel home-guide">
+        <view class="row home-guide-head">
+          <view class="home-guide-symbol" aria-hidden="true"><image class="icon" src="/assets/icons/help-primary.svg" mode="aspectFit"></image></view>
+          <text class="title grow">先了解记录与提醒</text>
+        </view>
+        <text class="muted paragraph home-guide-copy">数据仅保存在当前设备，没有云同步。请把备份保存在小程序之外，换机或清理数据可能丢失记录。</text>
+        <text class="muted paragraph home-guide-copy">提醒在应用内查看，也可主动加入手机日历；没有微信后台到点自动推送。日历通知取决于实际保存和设备权限，编辑／删除应用内提醒不会同步修改系统事件。</text>
+        <view class="row home-guide-actions"><view class="button button-small button-secondary grow" bindtap="openGuide" hover-class="is-pressed" aria-role="button"><text>完整说明</text></view><view class="button button-small button-soft grow home-guide-ok" bindtap="dismissGuide" hover-class="is-pressed" aria-role="button"><text>知道了</text></view></view>
+      </view>
       <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取投递记录…</text></view>
-      <empty-state wx:elif="{{error}}" symbol="!" title="暂时无法读取投递记录" description="{{error}}" action-label="重试" bind:action="loadHome"></empty-state>
+      <empty-state wx:elif="{{error}}" icon="alert-danger" title="暂时无法读取投递记录" description="{{error}}" action-label="重试" bind:action="loadHome"></empty-state>
       <block wx:else>
         <view class="row-between home-greeting">
-          <text class="home-heading">{{greeting}}</text>
-          <text class="muted">{{dateLabel}}</text>
+          <text class="home-heading grow">{{greeting}}</text>
+          <text class="subtle home-date">{{dateLabel}}</text>
         </view>
 
-        <view class="home-summary">
+        <view class="surface home-summary">
           <view class="row-between home-summary-header">
             <text class="home-summary-label">已投递</text>
             <view class="week-control" hover-class="is-pressed" bindtap="showWeekDefinition" aria-role="button" aria-label="本周新增 {{weekAdded}} 份，查看统计口径">
-              <view class="week-chip"><text>本周 +{{weekAdded}}</text><text class="week-info" aria-hidden="true">?</text></view>
+              <view class="week-chip"><text>本周 +{{weekAdded}}</text><image class="icon icon-sm week-info" src="/assets/icons/help-primary.svg" mode="aspectFit" aria-hidden="true"></image></view>
             </view>
           </view>
           <view class="home-total">
@@ -37,10 +46,11 @@
             </view>
           </view>
           <text wx:else class="distribution-empty">记下第一份投递，开始追踪进度</text>
+          <text wx:if="{{pendingStatusCount}}" class="distribution-empty">另有 {{pendingStatusCount}} 条历史“已放弃”投递待确认，计入总数</text>
         </view>
 
         <view class="button button-primary home-add" hover-class="is-pressed" bindtap="createApplication" aria-role="button">
-          <text class="home-add-icon" aria-hidden="true">＋</text><text>记一笔投递</text>
+          <image class="icon icon-before" src="/assets/icons/plus-white.svg" mode="aspectFit" aria-hidden="true"></image><text>记一笔投递</text>
         </view>
 
         <view class="section home-schedule">
@@ -53,7 +63,7 @@
               </view>
             </block>
             <view wx:else class="row schedule-empty">
-              <view class="schedule-empty-symbol" aria-hidden="true"><text>◷</text></view>
+              <view class="schedule-empty-symbol" aria-hidden="true"><image class="icon" src="/assets/icons/calendar-primary.svg" mode="aspectFit"></image></view>
               <view class="grow schedule-empty-copy">
                 <text class="schedule-empty-title">暂无即将到来的提醒</text>
                 <text class="muted">在投递详情里添加面试或跟进提醒。</text>
@@ -65,8 +75,14 @@
         <view wx:if="{{overdueCount}}" class="surface section home-overdue">
           <view class="row-between overdue-toggle" hover-class="is-pressed" bindtap="toggleOverdue"
             aria-role="button" aria-label="已逾期 {{overdueCount}} 条，{{showOverdue ? '收起' : '查看'}}">
-            <text class="overdue-heading">已逾期 {{overdueCount}} 条</text>
-            <text class="link">{{showOverdue ? '收起' : '查看 ›'}}</text>
+            <view class="row">
+              <image class="icon icon-before" src="/assets/icons/alert-danger.svg" mode="aspectFit" aria-hidden="true"></image>
+              <text class="overdue-heading">已逾期 {{overdueCount}} 条</text>
+            </view>
+            <view class="row overdue-action">
+              <text class="link">{{showOverdue ? '收起' : '查看'}}</text>
+              <image class="icon icon-sm icon-after {{showOverdue ? 'overdue-open' : ''}}" src="/assets/icons/chevron-down-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
+            </view>
           </view>
           <block wx:if="{{showOverdue}}">
             <view wx:for="{{overdueReminders}}" wx:key="viewKey" class="schedule-row schedule-row-separator"
@@ -79,7 +95,7 @@
         <view class="section">
           <view class="section-head">
             <text class="title">最近投递</text>
-            <view wx:if="{{recent.length}}" class="link home-more" hover-class="is-pressed" bindtap="openList" aria-role="button"><text>查看全部 ›</text></view>
+            <view wx:if="{{recent.length}}" class="text-action home-more" hover-class="is-pressed" bindtap="openList" aria-role="button" aria-label="查看全部投递"><text>查看全部</text><image class="icon icon-sm icon-after" src="/assets/icons/chevron-right-primary.svg" mode="aspectFit" aria-hidden="true"></image></view>
           </view>
           <block wx:if="{{recent.length}}">
             <view wx:for="{{recent}}" wx:key="id" class="recent-row" data-id="{{item.id}}"
@@ -87,7 +103,7 @@
               <app-card item="{{item}}" compact="{{true}}"></app-card>
             </view>
           </block>
-          <empty-state wx:else symbol="✉" title="从第一份投递开始" description="记下投过的岗位，下一步跟进更有数。"
+          <empty-state wx:else icon="file-text-primary" title="从第一份投递开始" description="记下投过的岗位，下一步跟进更有数。"
             action-label="记第一笔" bind:action="createApplication"></empty-state>
         </view>
       </block>

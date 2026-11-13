@@ -55,6 +55,7 @@ const keyboardPage = {
     this.keyboardEpoch = (this.keyboardEpoch || 0) + 1
     this.keyboardLayoutEpoch = (this.keyboardLayoutEpoch || 0) + 1
     this.keyboardAnchor = ''
+    if (this.onKeyboardLayout) this.onKeyboardLayout(0)
     this.setData({ keyboardHeight: 0, keyboardInset: 0, keyboardInputMaxHeight: 160, focusField: '' })
   },
 
@@ -93,6 +94,7 @@ const keyboardPage = {
     const layoutEpoch = ++this.keyboardLayoutEpoch
     const applyInset = value => {
       if (layoutEpoch !== this.keyboardLayoutEpoch || !this.keyboardListening) return
+      if (this.onKeyboardLayout) this.onKeyboardLayout(height)
       this.setData({ keyboardHeight: height, keyboardInset: value }, () => {
         if (epoch === this.keyboardEpoch) this.ensureKeyboardField()
       })

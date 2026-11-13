@@ -2,16 +2,16 @@
 <view wx:if="{{item}}" class="reminder-item {{compact ? 'reminder-compact' : ''}}">
   <view class="row reminder-main">
     <view class="reminder-symbol {{item.type === 'interview' ? 'reminder-interview' : 'reminder-followup'}}" aria-hidden="true">
-      <text>{{item.type === 'interview' ? '面' : '跟'}}</text>
+      <image class="icon" src="/assets/icons/{{item.type === 'interview' ? 'users-warm' : 'bell-primary'}}.svg" mode="aspectFit"></image>
     </view>
     <view class="grow reminder-copy">
       <text class="reminder-title">{{item.title}}</text>
       <text wx:if="{{item.subtitle}}" class="reminder-subtitle">{{item.subtitle}}</text>
     </view>
     <view class="reminder-when">
-      <text class="reminder-time {{item.overdue ? 'reminder-overdue' : ''}}">{{item.timeLabel}}</text>
-      <text wx:if="{{item.done}}" class="subtle">已完成</text>
-      <text wx:elif="{{item.overdue}}" class="reminder-overdue">已过期</text>
+      <text class="reminder-time {{item.overdue ? 'reminder-overdue' : ''}} {{item.done ? 'reminder-time-done' : ''}}">{{item.timeLabel}}</text>
+      <text wx:if="{{item.done}}" class="reminder-state">已完成</text>
+      <text wx:elif="{{item.overdue}}" class="reminder-state reminder-overdue">已过期</text>
     </view>
   </view>
   <view wx:if="{{!compact && (item.location || item.link || item.note)}}" class="reminder-extra">

@@ -1,21 +1,40 @@
-
+/*
+ * 投递有数视觉基础：颜色、字号、间距、圆角集中定义。
+ * 字号与热区用 px，避免 rpx 在 320px 窄屏把文字和点击区缩小；留白用 rpx。
+ */
 page {
-  --background: #F6F7FB;
+  --background: #F4F6FA;
   --surface: #FFFFFF;
-  --primary: #4460E4;
-  --primary-strong: #3E55D4;
-  --primary-soft: #EBEFFF;
-  --ink: #192439;
-  --muted: #566177;
-  --subtle: #657088;
-  --line: #E7EAF2;
-  --danger: #A13D51;
-  --danger-soft: #FFF0F3;
-  --radius: 24rpx;
+  --surface-muted: #F1F3F7;
+  --primary: #3B57D4;
+  --primary-strong: #2E47BA;
+  --primary-soft: #ECF0FE;
+  --ink: #1A2338;
+  --muted: #535D73;
+  --subtle: #636D84;
+  --line: #E6E9F0;
+  --line-strong: #D5DAE4;
+  --danger: #B03A50;
+  --danger-soft: #FDEEF1;
+  --warning: #93500F;
+  --warning-soft: #FDF0DF;
+  --radius-lg: 28rpx;
+  --radius: 20rpx;
+  --radius-sm: 14rpx;
+  --shadow: 0 2px 10px rgba(26, 35, 56, 0.05);
+  --text-display: 34px;
+  --text-h1: 22px;
+  --text-h2: 17px;
+  --text-body: 15px;
+  --text-secondary: 14px;
+  --text-caption: 13px;
+  --text-tag: 12px;
+  --touch: 44px;
   background-color: var(--background);
   color: var(--ink);
-  font-size: 28rpx;
-  line-height: 1.45;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  font-size: var(--text-body);
+  line-height: 1.5;
 }
 
 .page-shell {
@@ -39,27 +58,28 @@ page {
 .page-content {
   display: flex;
   flex-direction: column;
-  padding: 24rpx 32rpx 40rpx;
+  padding: 24rpx 32rpx 48rpx;
 }
 
 .page-content-safe {
-  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
 }
 
+/* 卡片只用一层轻阴影；嵌套内容用分隔线或浅底，不再叠加阴影。 */
 .surface {
   display: flex;
   flex-direction: column;
   background-color: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: 0 8rpx 24rpx rgba(36, 51, 96, 0.055);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
 }
 
 .panel {
-  padding: 24rpx;
+  padding: 32rpx;
 }
 
 .section {
-  margin-top: 24rpx;
+  margin-top: 32rpx;
 }
 
 .section-head {
@@ -67,7 +87,8 @@ page {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8rpx;
+  min-height: var(--touch);
+  margin-bottom: 12rpx;
 }
 
 .row {
@@ -94,38 +115,101 @@ page {
   min-width: 0;
 }
 
+/* 文字类只定义颜色与字号，不改变 display 和对齐，避免覆盖按钮布局。 */
 .title {
   color: var(--ink);
-  font-size: 34rpx;
-  font-weight: 700;
-  line-height: 1.3;
+  font-size: var(--text-h2);
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .muted {
   color: var(--muted);
-  font-size: 24rpx;
+  font-size: var(--text-caption);
+  line-height: 1.55;
 }
 
 .subtle {
   color: var(--subtle);
-  font-size: 24rpx;
+  font-size: var(--text-caption);
+  line-height: 1.55;
 }
 
 .link {
   color: var(--primary-strong);
-  font-size: 24rpx;
+  font-size: var(--text-secondary);
   font-weight: 600;
+}
+
+.paragraph {
+  display: block;
+  font-size: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.break-text {
+  word-break: break-all;
 }
 
 .demo-pill {
   flex-shrink: 0;
-  padding: 0 8rpx;
-  border-radius: 16rpx;
-  background-color: #EEF0F4;
-  color: #565F71;
-  font-size: 20rpx;
-  font-weight: 650;
-  line-height: 1.5;
+  padding: 0 12rpx;
+  border-radius: 999px;
+  background-color: var(--surface-muted);
+  color: var(--muted);
+  font-size: var(--text-tag);
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.icon {
+  display: block;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.icon-sm {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-lg {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-before {
+  margin-right: 6px;
+}
+
+.icon-after {
+  margin-left: 2px;
+}
+
+/* 纯图标按钮：图标可以小，热区固定 44×44px。 */
+.icon-button {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: var(--radius);
+}
+
+.text-action {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: var(--touch);
+  color: var(--primary-strong);
+  font-size: var(--text-secondary);
+  font-weight: 600;
 }
 
 .button {
@@ -134,23 +218,28 @@ page {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  min-height: 88rpx;
-  padding: 8rpx 24rpx;
+  min-height: 48px;
+  padding: 8rpx 32rpx;
   border-radius: var(--radius);
-  font-size: 28rpx;
-  font-weight: 650;
-  line-height: 1.25;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
 }
 
 .button-primary {
   background-color: var(--primary);
   color: #FFFFFF;
-  box-shadow: 0 8rpx 16rpx rgba(79, 110, 247, 0.2);
 }
 
 .button-soft {
   background-color: var(--primary-soft);
   color: var(--primary-strong);
+}
+
+.button-secondary {
+  background-color: var(--surface-muted);
+  color: var(--ink);
 }
 
 .button-danger {
@@ -159,18 +248,18 @@ page {
 }
 
 .button-small {
-  min-height: 80rpx;
-  padding: 8rpx 24rpx;
-  border-radius: 16rpx;
-  font-size: 24rpx;
+  min-height: var(--touch);
+  padding: 4rpx 24rpx;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-secondary);
 }
 
 .is-pressed {
-  opacity: 0.72;
+  opacity: 0.7;
 }
 
 .card-pressed {
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .chip {
@@ -179,34 +268,39 @@ page {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  min-height: 80rpx;
-  margin: 0 8rpx 8rpx 0;
-  padding: 8rpx 16rpx;
-  border-radius: 32rpx;
-  background-color: #EDF0F6;
+  min-height: var(--touch);
+  margin: 0 12rpx 12rpx 0;
+  padding: 0 28rpx;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--line-strong);
+  border-radius: 999px;
+  background-color: var(--surface);
   color: var(--muted);
-  font-size: 24rpx;
-  font-weight: 550;
+  font-size: var(--text-secondary);
+  font-weight: 500;
   line-height: 1.2;
 }
 
 .chip-selected {
+  border-color: var(--primary);
   background-color: var(--primary-soft);
   color: var(--primary-strong);
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  margin-top: 24rpx;
+  margin-top: 28rpx;
 }
 
 .field-label {
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
   color: var(--ink);
-  font-size: 26rpx;
-  font-weight: 650;
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .field-input,
@@ -214,23 +308,24 @@ page {
 .field-picker {
   width: 100%;
   box-sizing: border-box;
-  border-width: 2rpx;
+  border-width: 1px;
   border-style: solid;
-  border-color: var(--line);
-  border-radius: 16rpx;
-  background-color: #F8F9FC;
+  border-color: var(--line-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
   color: var(--ink);
-  font-size: 28rpx;
+  font-size: var(--text-body);
 }
 
 .field-input {
-  height: 84rpx;
-  padding: 0 16rpx;
+  height: 46px;
+  padding: 0 24rpx;
 }
 
 .field-textarea {
-  height: 144rpx;
-  padding: 16rpx;
+  height: 96px;
+  padding: 20rpx 24rpx;
+  line-height: 1.6;
 }
 
 .field-picker {
@@ -238,29 +333,29 @@ page {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  min-height: 80rpx;
-  padding: 8rpx 16rpx;
+  min-height: 46px;
+  padding: 8rpx 20rpx 8rpx 24rpx;
 }
 
 .field-invalid {
-  border-color: #C85165;
+  border-color: var(--danger);
   background-color: var(--danger-soft);
 }
 
 .field-error {
   margin-top: 8rpx;
   color: var(--danger);
-  font-size: 24rpx;
+  font-size: var(--text-caption);
 }
 
 .required-mark {
-  color: var(--primary-strong);
+  color: var(--danger);
 }
 
 .form-actions {
   flex-shrink: 0;
-  padding: 8rpx 32rpx calc(8rpx + env(safe-area-inset-bottom));
-  border-top-width: 2rpx;
+  padding: 16rpx 32rpx calc(16rpx + env(safe-area-inset-bottom));
+  border-top-width: 1px;
   border-top-style: solid;
   border-top-color: var(--line);
   background-color: var(--surface);
@@ -273,12 +368,27 @@ page {
   justify-content: center;
   min-height: 160rpx;
   color: var(--muted);
-  font-size: 26rpx;
+  font-size: var(--text-secondary);
+}
+
+.callout {
+  display: block;
+  padding: 20rpx 24rpx;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-muted);
+  color: var(--muted);
+  font-size: var(--text-caption);
+  line-height: 1.6;
+}
+
+.callout-danger {
+  background-color: var(--danger-soft);
+  color: var(--danger);
 }
 
 /* 键盘留位使用 px，不叠加安全区。 */
 .keyboard-actions {
-  padding-bottom: 8rpx;
+  padding-bottom: 16rpx;
 }
 
 .keyboard-space {

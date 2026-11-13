@@ -1,0 +1,15 @@
+<view class="tab-host">
+  <view wx:if="{{!keyboardOpen}}" class="tab-bar" style="padding-bottom: {{safeBottom}}px;">
+    <view class="tab-items">
+      <view wx:for="{{items}}" wx:key="pagePath" class="tab-item {{selected === index ? 'tab-selected' : ''}}"
+        data-index="{{index}}" bindtap="selectTab" hover-class="tab-pressed" aria-role="button"
+        aria-label="{{item.text + (selected === index ? '，已选中' : '') + (index === 0 && badge ? '，' + badge + '条待处理提醒' : '')}}">
+        <view class="tab-icon-wrap">
+          <image class="tab-icon" src="/assets/tabbar/{{item.icon}}{{selected === index ? '-selected' : ''}}.svg" mode="aspectFit" aria-hidden="true"></image>
+          <view wx:if="{{index === 0 && badge}}" class="tab-badge"><text>{{badge}}</text></view>
+        </view>
+        <text class="tab-label">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+</view>

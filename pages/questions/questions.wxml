@@ -1,0 +1,54 @@
+<view class="page-shell">
+  <view class="page-nav">
+    <navigation-bar title="面试题本" back="{{true}}" loading="{{loading}}" background="#F4F6FA" color="#1A2338"></navigation-bar>
+  </view>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
+    <view class="questions-header">
+      <text class="muted questions-intro">回顾每一次面试遇到的问题</text>
+      <view class="row questions-search"><image class="icon questions-search-mark" src="/assets/icons/search-muted.svg" mode="aspectFit" aria-hidden="true"></image>
+        <input id="questions-search" class="grow questions-input" data-anchor="questions-search" value="{{query}}"
+          adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur"
+          bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onSearch" confirm-type="search"
+          placeholder="搜索问题、公司或岗位" placeholder-class="questions-placeholder" aria-label="搜索问题、公司或岗位" />
+        <view wx:if="{{query}}" class="icon-button questions-clear" hover-class="is-pressed" bindtap="clearSearch" aria-role="button" aria-label="清空搜索"><image class="icon" src="/assets/icons/close-muted.svg" mode="aspectFit" aria-hidden="true"></image></view>
+      </view>
+      <view wx:if="{{!loading && !error}}" class="questions-summary">
+        <text class="title">共 {{total}} 道问题 · 来自 {{reviewCount}} 场面试</text>
+        <text class="subtle">按面试日期倒序 · 仅统计已记录问题的复盘</text>
+        <text wx:if="{{hasQuery}}" class="link questions-match">当前搜索匹配 {{matched}} 道题</text>
+      </view>
+    </view>
+    <view wx:if="{{loading}}" class="questions-row"><view class="surface loading-card"><text>正在整理面试题本…</text></view></view>
+    <view wx:elif="{{error}}" class="questions-row">
+      <empty-state icon="alert-danger" title="暂时无法读取面试题本" description="{{error}}" action-label="重试" bind:action="loadQuestions"></empty-state>
+    </view>
+    <view wx:elif="{{!total}}" class="questions-row">
+      <empty-state icon="book-primary" title="还没有收录的问题" description="在投递详情中保存面试复盘，填写的问题就会自动汇总到这里。"></empty-state>
+    </view>
+    <view wx:elif="{{!matched}}" class="questions-row">
+      <empty-state icon="search-primary" title="暂无匹配的面试题" description="换个问题关键词、公司或岗位试试。" action-label="清空搜索" bind:action="clearSearch"></empty-state>
+    </view>
+    <block wx:else>
+      <view wx:for="{{items}}" wx:key="key" class="questions-row">
+        <view class="surface panel question-card" data-key="{{item.key}}" bindtap="openReview" bindtouchstart="onQuestionTouchStart" catchlongpress="onQuestionLongPress" hover-class="card-pressed" aria-role="button" aria-label="{{item.company}}，{{item.round}}，打开原复盘">
+          <view class="row question-source"><text class="grow question-company">{{item.company}}</text><text wx:if="{{item.demo}}" class="demo-pill">示例</text></view>
+          <text class="muted question-position">{{item.position}}</text>
+          <text class="subtle question-date">{{item.round}} · {{item.dateLabel}}</text>
+          <text class="question-label">面试问题</text>
+          <view class="question-text">
+            <view wx:for="{{item.questionLines}}" wx:for-item="line" wx:key="key" class="question-line"><text user-select="{{true}}">{{line.text}}</text></view>
+          </view>
+          <view class="question-answer">
+            <text class="question-answer-label">我的回答</text>
+            <view class="question-answer-text">
+              <view wx:for="{{item.answerLines}}" wx:for-item="line" wx:key="key" class="question-line"><text user-select="{{true}}">{{line.text}}</text></view>
+            </view>
+            <view wx:if="{{item.canExpand}}" class="link question-expand" data-key="{{item.key}}" catchtap="toggleAnswer" hover-class="is-pressed" aria-role="button"><text>{{item.expanded ? '收起回答' : '展开完整回答'}}</text></view>
+          </view>
+        </view>
+      </view>
+    </block>
+    <view class="questions-bottom"></view>
+  </scroll-view>
+  <view wx:if="{{keyboardInset}}" class="keyboard-space" style="height: {{keyboardInset}}px;" aria-hidden="true"></view>
+</view>

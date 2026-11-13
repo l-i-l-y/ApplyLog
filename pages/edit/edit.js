@@ -1,4 +1,5 @@
 const { keyboardPage, keyboardData } = require('../../utils/keyboard')
+const { leaveGuard } = require('../../utils/leave-guard')
 
 const store = require('../../utils/store')
 const { CHANNELS, isDemoId } = require('../../utils/constants')
@@ -10,6 +11,7 @@ const SALARY_OPTIONS = ['暂不填写', ...SALARY_VALUES.slice(1), '自定义输
 
 Page({
   ...keyboardPage,
+  ...leaveGuard,
   data: {
     ...keyboardData,
     pageTitle: '记一笔投递',
@@ -40,9 +42,14 @@ Page({
     this.loadRecord()
   },
 
-  onHide() { this.stopKeyboard() },
+  onHide() { this.stopKeyboard(); this.suspendLeaveGuard() },
 
-  onUnload() { this.stopKeyboard() },
+  onUnload() { this.stopKeyboard(); this.suspendLeaveGuard() },
+
+  editSnapshot() {
+    const { company, position, date, channel, city, salary, jdLink, note } = this.data.form
+    return { company, position, date, channel, city, salary, jdLink, note }
+  },
 
   loadRecord() {
     this.setData({ loading: true, error: '' })
@@ -52,7 +59,7 @@ Page({
       const record = this.applicationId ? data.get(this.applicationId) : null
       if (this.applicationId && !record) {
         this.setData({ loading: false, error: '这条投递记录已不存在' })
-        returnToPrevious('这条投递记录已不存在', 'none')
+        if (!this.initialized) returnToPrevious('这条投递记录已不存在', 'none')
         return
       }
 
@@ -72,7 +79,7 @@ Page({
         }
         this.initialized = true
       }
-      this.setData(changes)
+      this.setData(changes, () => this.beginLeaveGuard())
     } catch (error) {
       this.setData({ loading: false, error: error.message })
     }
@@ -83,7 +90,7 @@ Page({
     const changes = { ['form.' + field]: event.detail.value }
     if (field === 'company' || field === 'position') changes['errors.' + field] = false
     if (field === 'salary') changes.salaryCustomDraft = event.detail.value
-    this.setData(changes, () => this.ensureKeyboardField())
+    this.setData(changes, () => this.afterFormChange())
   },
 
   focusNext(event) {
@@ -110,11 +117,11 @@ Page({
 
   chooseChannel(event) {
     const { channel } = event.currentTarget.dataset
-    this.setData({ 'form.channel': this.data.form.channel === channel ? '' : channel })
+    this.setData({ 'form.channel': this.data.form.channel === channel ? '' : channel }, () => this.refreshLeaveGuard())
   },
 
   pickDate(event) {
-    this.setData({ 'form.date': event.detail.value, 'errors.date': false })
+    this.setData({ 'form.date': event.detail.value, 'errors.date': false }, () => this.refreshLeaveGuard())
   },
 
   pickSalary(event) {
@@ -127,7 +134,7 @@ Page({
     this.setData({
       salaryIndex, salaryCustom, focusField: '',
       'form.salary': salaryCustom ? this.data.salaryCustomDraft : SALARY_VALUES[salaryIndex]
-    })
+    }, () => this.refreshLeaveGuard())
   },
 
   saveApplication() {
@@ -149,8 +156,14 @@ Page({
     const editing = Boolean(this.applicationId)
     try {
       const payload = { ...form, appliedAt }
-      if (this.applicationId) store.update(this.applicationId, payload)
-      else this.applicationId = store.create(payload).id
+      const signature = this.formSignature()
+      if (this.lastSavedSignature !== signature) {
+        if (this.applicationId) store.update(this.applicationId, payload)
+        else this.applicationId = store.create(payload).id
+        this.lastSavedSignature = signature
+      } else if (!store.get(this.applicationId)) throw new Error('这条投递记录已不存在')
+      this.markFormSaved()
+      this.releaseKeyboard()
       this.setData({ pageTitle: '编辑投递' })
     } catch (error) {
       this.setData({ saving: false })
