@@ -1,8 +1,7 @@
 const { GUIDE, PRIVACY, versionInfo } = require('../../utils/app-info')
 const { toast } = require('../../utils/ui')
 Page({
-  data: { title: '使用与数据说明', guide: GUIDE, privacy: PRIVACY, version: null, canOpenPrivacy: false },
-  onLoad(options) { this.setData({ title: options.section === 'privacy' ? '隐私与数据说明' : '使用与数据说明' }) },
+  data: { title: '使用与隐私说明', guide: GUIDE, privacy: PRIVACY, version: null, canOpenPrivacy: false },
   onShow() { this.setData({ version: versionInfo(), canOpenPrivacy: typeof wx.openPrivacyContract === 'function' }) },
   openPrivacy() {
     if (typeof wx.openPrivacyContract !== 'function') { toast('请在手机微信中查看隐私指引'); return }

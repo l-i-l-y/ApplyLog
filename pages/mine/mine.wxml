@@ -102,21 +102,16 @@
           <text class="muted mine-about">记录求职投递、安排跟进和复盘面试。数据仅保存在当前设备，没有云同步。</text>
         </view>
         <view class="row mine-setting" bindtap="openGuide" hover-class="is-pressed" aria-role="button">
-          <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/help-primary.svg" mode="aspectFit"></image></view>
-          <text class="grow mine-setting-title">使用与提醒说明</text>
-          <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
-        </view>
-        <view class="row mine-setting" bindtap="openPrivacy" hover-class="is-pressed" aria-role="button">
           <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/shield-primary.svg" mode="aspectFit"></image></view>
-          <text class="grow mine-setting-title">隐私与数据说明</text>
+          <text class="grow mine-setting-title">使用与隐私说明</text>
           <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
         </view>
-        <button wx:if="{{canFeedback}}" class="row mine-setting mine-feedback" open-type="feedback" hover-class="is-pressed" aria-label="微信意见反馈">
+        <view wx:if="{{canFeedback}}" class="row mine-setting mine-feedback" hover-class="is-pressed">
           <view class="mine-setting-icon" aria-hidden="true"><image class="icon" src="/assets/icons/message-primary.svg" mode="aspectFit"></image></view>
           <text class="grow mine-setting-title">用户反馈</text>
-          <text class="subtle mine-question-count">微信反馈</text>
           <image class="icon icon-sm" src="/assets/icons/chevron-right-subtle.svg" mode="aspectFit" aria-hidden="true"></image>
-        </button>
+          <button class="mine-feedback-trigger" open-type="feedback" hover-class="none" aria-label="用户反馈"></button>
+        </view>
         <text wx:else class="muted mine-group-note mine-feedback-note">请在手机微信的小程序菜单中查看反馈入口。</text>
         <text class="subtle mine-group-footer">反馈由微信提供，请勿提交不必要的个人敏感信息。</text>
       </view>

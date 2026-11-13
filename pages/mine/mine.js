@@ -19,7 +19,6 @@ Page({
 
   openBackup() { openPage('/pages/backup/backup') },
   openGuide() { openPage('/pages/help/help') },
-  openPrivacy() { openPage('/pages/help/help?section=privacy') },
   exportBackup() {
     if (this.data.exporting || this.data.sharing || this.data.clearing) return
     this.preparedBackup = null
