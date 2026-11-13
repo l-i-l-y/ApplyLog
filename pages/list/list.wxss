@@ -1,0 +1,90 @@
+
+.list-controls {
+  display: flex;
+  flex-direction: column;
+  padding: 16rpx 32rpx;
+}
+
+.list-search {
+  flex-direction: row;
+  min-height: 88rpx;
+  padding: 0 16rpx;
+  border-width: 2rpx;
+  border-style: solid;
+  border-color: var(--line);
+}
+
+.search-mark {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+  width: 40rpx;
+  margin-right: 8rpx;
+}
+
+.search-lens {
+  width: 22rpx;
+  height: 22rpx;
+  border-width: 3rpx;
+  border-style: solid;
+  border-color: var(--muted);
+  border-radius: 50%;
+}
+
+.search-handle {
+  width: 10rpx;
+  height: 3rpx;
+  margin-top: 16rpx;
+  border-radius: 4rpx;
+  background-color: var(--muted);
+  transform: rotate(45deg);
+}
+
+.search-input {
+  height: 80rpx;
+  color: var(--ink);
+  font-size: 28rpx;
+}
+
+.search-clear {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  color: var(--muted);
+  font-size: 38rpx;
+}
+
+.list-filters {
+  margin-top: 16rpx;
+}
+
+.list-heading {
+  margin-top: 16rpx;
+}
+
+.list-count {
+  margin-left: 16rpx;
+}
+
+.list-create {
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  padding: 8rpx 0 8rpx 16rpx;
+}
+
+.list-row {
+  display: flex;
+  flex-direction: column;
+  margin: 0 32rpx 16rpx;
+}
+
+.list-bottom {
+  height: 24rpx;
+}

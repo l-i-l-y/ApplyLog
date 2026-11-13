@@ -1,0 +1,88 @@
+
+<view class="page-shell">
+  <view class="page-nav">
+    <navigation-bar title="{{title}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+  </view>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
+    <view class="page-content page-content-safe">
+      <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取面试复盘…</text></view>
+      <empty-state wx:elif="{{error}}" symbol="!" title="暂时无法打开面试复盘" description="{{error}}" action-label="重试"
+        bind:action="loadReview"></empty-state>
+      <block wx:else>
+        <view class="surface panel review-heading">
+          <view class="row-between"><text class="title grow review-company">{{company}}</text><text wx:if="{{demo}}" class="demo-pill">示例</text></view>
+          <text class="muted review-position">{{position}}</text>
+          <view class="review-metadata">
+            <view class="field review-field">
+              <text class="field-label">面试轮次</text>
+              <picker mode="selector" range="{{rounds}}" value="{{form.roundIndex}}" bindchange="pickRound">
+                <view class="field-picker"><text>{{rounds[form.roundIndex]}}</text><text class="subtle">›</text></view>
+              </picker>
+            </view>
+            <view class="field review-field review-date">
+              <text class="field-label">面试日期</text>
+              <picker mode="date" value="{{form.date}}" end="{{today}}" bindchange="pickDate">
+                <view class="field-picker {{errors.date ? 'field-invalid' : ''}}"><text>{{form.date}}</text><text class="subtle">›</text></view>
+              </picker>
+              <text wx:if="{{errors.date}}" class="field-error">请选择有效的日期</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="section">
+          <view class="section-head">
+            <text class="title">面试问题</text>
+            <view class="button button-small button-soft" hover-class="is-pressed" bindtap="addQuestion" aria-role="button"><text>＋ 添加问题</text></view>
+          </view>
+          <view wx:if="{{!form.questions.length}}" class="surface panel"><text class="muted">添加一道想留存的问题，也可以直接记录复盘心得。</text></view>
+          <view wx:for="{{form.questions}}" wx:key="key" class="surface panel question-card">
+            <view class="row-between">
+              <text class="question-title">问题 {{index + 1}}</text>
+              <view class="question-remove" data-index="{{index}}" hover-class="is-pressed" bindtap="removeQuestion" aria-role="button"><text>移除</text></view>
+            </view>
+            <view class="field">
+              <textarea style="max-height: {{keyboardInputMaxHeight}}px;" cursor-spacing="12" id="review-question-{{item.key}}" class="field-textarea review-question-input {{errors.questionIndex === index ? 'field-invalid' : ''}}"
+                value="{{item.q}}" data-index="{{index}}" data-field="q" data-anchor="review-question-{{item.key}}" placeholder="面试官问了什么？" maxlength="500" aria-label="面试问题"
+                adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur"
+                bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onQuestionInput"></textarea>
+              <text wx:if="{{errors.questionIndex === index}}" class="field-error">请填写这个回答对应的问题</text>
+            </view>
+            <view class="field">
+              <text class="field-label">我的回答</text>
+              <textarea style="max-height: {{keyboardInputMaxHeight}}px;" cursor-spacing="12" id="review-answer-{{item.key}}" class="field-textarea" value="{{item.myAnswer}}" data-index="{{index}}" data-field="myAnswer"
+                data-anchor="review-answer-{{item.key}}" placeholder="记录当时的回答（选填）" maxlength="1200" aria-label="我的回答"
+                adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur"
+                bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onQuestionInput"></textarea>
+            </view>
+          </view>
+        </view>
+
+        <view class="surface panel section">
+          <text class="title">复盘心得</text>
+          <view class="field">
+            <textarea style="max-height: {{keyboardInputMaxHeight}}px;" cursor-spacing="12" id="review-reflection" class="field-textarea" value="{{form.reflection}}" placeholder="哪些地方做得好，下次想改进什么？" maxlength="1600"
+              aria-label="复盘心得" data-anchor="review-reflection" adjust-position="{{false}}" hold-keyboard="{{true}}"
+              bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur" bindkeyboardheightchange="onFieldKeyboardHeight" bindinput="onReflection"></textarea>
+          </view>
+          <view class="field">
+            <view class="row-between">
+              <text class="field-label">自我评分 <text class="required-mark">*</text></text>
+              <text wx:if="{{form.selfScore}}" class="link">{{form.selfScore}} / 5</text>
+            </view>
+            <view class="review-stars">
+              <view wx:for="{{stars}}" wx:key="*this" class="review-star {{form.selfScore >= item ? 'review-star-selected' : ''}}"
+                data-score="{{item}}" hover-class="is-pressed" bindtap="selectScore" aria-role="button" aria-label="{{item}} 星">
+                <text>{{form.selfScore >= item ? '★' : '☆'}}</text>
+              </view>
+            </view>
+            <text wx:if="{{errors.score}}" class="field-error">请选择 1 到 5 星评分</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </scroll-view>
+  <view wx:if="{{!loading && !error}}" class="form-actions {{keyboardHeight ? 'keyboard-actions' : ''}}">
+    <view class="button button-primary" hover-class="is-pressed" bindtap="saveReview" aria-role="button"><text>{{saving ? '保存中…' : '保存复盘'}}</text></view>
+  </view>
+  <view wx:if="{{keyboardHeight}}" class="keyboard-space" style="height: {{keyboardInset}}px;" aria-hidden="true"></view>
+</view>

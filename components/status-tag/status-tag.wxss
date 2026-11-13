@@ -1,0 +1,21 @@
+
+.status-tag {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 40rpx;
+  padding: 8rpx 8rpx;
+  border-radius: 24rpx;
+  font-size: 22rpx;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.status-tag-dot {
+  width: 8rpx;
+  height: 8rpx;
+  margin-right: 8rpx;
+  border-radius: 50%;
+}

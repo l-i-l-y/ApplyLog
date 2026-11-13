@@ -1,0 +1,96 @@
+
+<view class="page-shell">
+  <view class="page-nav">
+    <navigation-bar title="投递有数" back="{{false}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+  </view>
+  <scroll-view class="page-scroll" type="list" scroll-y>
+    <view class="page-content home-content">
+      <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取投递记录…</text></view>
+      <empty-state wx:elif="{{error}}" symbol="!" title="暂时无法读取投递记录" description="{{error}}" action-label="重试" bind:action="loadHome"></empty-state>
+      <block wx:else>
+        <view class="row-between home-greeting">
+          <text class="home-heading">{{greeting}}</text>
+          <text class="muted">{{dateLabel}}</text>
+        </view>
+
+        <view class="home-summary">
+          <view class="row-between home-summary-header">
+            <text class="home-summary-label">已投递</text>
+            <view class="week-control" hover-class="is-pressed" bindtap="showWeekDefinition" aria-role="button" aria-label="本周新增 {{weekAdded}} 份，查看统计口径">
+              <view class="week-chip"><text>本周 +{{weekAdded}}</text><text class="week-info" aria-hidden="true">?</text></view>
+            </view>
+          </view>
+          <view class="home-total">
+            <text class="home-number">{{total}}</text>
+            <text class="home-unit">份</text>
+          </view>
+          <view class="distribution-track" aria-label="投递状态分布">
+            <block wx:for="{{distribution}}" wx:key="id">
+              <view wx:if="{{item.count}}" class="distribution-piece" style="width: {{item.width}}; background-color: {{item.chart}};"></view>
+            </block>
+          </view>
+          <view wx:if="{{total}}" class="distribution-legend">
+            <view wx:for="{{distribution}}" wx:key="id" class="legend-item">
+              <view class="legend-dot" style="background-color: {{item.chart}};"></view>
+              <text class="legend-label">{{item.short || item.label}}</text>
+              <text class="legend-count">{{item.count}}</text>
+            </view>
+          </view>
+          <text wx:else class="distribution-empty">记下第一份投递，开始追踪进度</text>
+        </view>
+
+        <view class="button button-primary home-add" hover-class="is-pressed" bindtap="createApplication" aria-role="button">
+          <text class="home-add-icon" aria-hidden="true">＋</text><text>记一笔投递</text>
+        </view>
+
+        <view class="section home-schedule">
+          <view class="section-head"><text class="title">即将到来</text></view>
+          <view class="surface schedule-panel">
+            <block wx:if="{{reminders.length}}">
+              <view wx:for="{{reminders}}" wx:key="viewKey" class="schedule-row {{index ? 'schedule-row-separator' : ''}}" data-id="{{item.applicationId}}"
+                hover-class="card-pressed" bindtap="openApplication" aria-role="button">
+                <reminder-item item="{{item}}" compact="{{true}}"></reminder-item>
+              </view>
+            </block>
+            <view wx:else class="row schedule-empty">
+              <view class="schedule-empty-symbol" aria-hidden="true"><text>◷</text></view>
+              <view class="grow schedule-empty-copy">
+                <text class="schedule-empty-title">暂无即将到来的提醒</text>
+                <text class="muted">在投递详情里添加面试或跟进提醒。</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{overdueCount}}" class="surface section home-overdue">
+          <view class="row-between overdue-toggle" hover-class="is-pressed" bindtap="toggleOverdue"
+            aria-role="button" aria-label="已逾期 {{overdueCount}} 条，{{showOverdue ? '收起' : '查看'}}">
+            <text class="overdue-heading">已逾期 {{overdueCount}} 条</text>
+            <text class="link">{{showOverdue ? '收起' : '查看 ›'}}</text>
+          </view>
+          <block wx:if="{{showOverdue}}">
+            <view wx:for="{{overdueReminders}}" wx:key="viewKey" class="schedule-row schedule-row-separator"
+              data-id="{{item.applicationId}}" hover-class="card-pressed" bindtap="openApplication" aria-role="button">
+              <reminder-item item="{{item}}" compact="{{true}}"></reminder-item>
+            </view>
+          </block>
+        </view>
+
+        <view class="section">
+          <view class="section-head">
+            <text class="title">最近投递</text>
+            <view wx:if="{{recent.length}}" class="link home-more" hover-class="is-pressed" bindtap="openList" aria-role="button"><text>查看全部 ›</text></view>
+          </view>
+          <block wx:if="{{recent.length}}">
+            <view wx:for="{{recent}}" wx:key="id" class="recent-row" data-id="{{item.id}}"
+              hover-class="card-pressed" bindtap="openApplication" aria-role="button">
+              <app-card item="{{item}}" compact="{{true}}"></app-card>
+            </view>
+          </block>
+          <empty-state wx:else symbol="✉" title="从第一份投递开始" description="记下投过的岗位，下一步跟进更有数。"
+            action-label="记第一笔" bind:action="createApplication"></empty-state>
+        </view>
+      </block>
+    </view>
+  </scroll-view>
+</view>

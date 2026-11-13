@@ -1,0 +1,96 @@
+
+.app-card {
+  padding: 24rpx;
+}
+
+.app-card-compact {
+  padding: 16rpx;
+}
+
+.app-card-mark {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 72rpx;
+  height: 72rpx;
+  margin-right: 16rpx;
+  border-radius: 20rpx;
+  background-color: var(--primary-soft);
+  color: var(--primary-strong);
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.app-card-compact .app-card-mark {
+  width: 64rpx;
+  height: 64rpx;
+  font-size: 26rpx;
+}
+
+.app-card-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-card-demo {
+  margin-right: 8rpx;
+}
+
+.app-card-company,
+.app-card-position {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-card-company {
+  color: var(--ink);
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.app-card-position {
+  margin-top: 8rpx;
+  color: var(--muted);
+  font-size: 24rpx;
+  line-height: 1.3;
+}
+
+.app-card-side {
+  flex-shrink: 0;
+  margin-left: 8rpx;
+}
+
+.app-card-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 80rpx;
+  height: 80rpx;
+  margin-left: 8rpx;
+  border-radius: 16rpx;
+  background-color: #F2F4F9;
+  color: var(--muted);
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.app-card-footer {
+  flex-wrap: wrap;
+  margin-top: 16rpx;
+  padding-top: 8rpx;
+  border-top-width: 2rpx;
+  border-top-style: solid;
+  border-top-color: var(--line);
+}
+
+.app-card-next {
+  min-width: 0;
+  max-width: 100%;
+  margin-left: 8rpx;
+  text-align: right;
+}

@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "empty-state": "/components/empty-state/empty-state",
+    "status-tag": "/components/status-tag/status-tag",
+    "reminder-item": "/components/reminder-item/reminder-item"
+  }
+}

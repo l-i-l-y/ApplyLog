@@ -1,0 +1,86 @@
+
+.reminder-item {
+  display: flex;
+  flex-direction: column;
+  padding: 16rpx 24rpx;
+}
+
+.reminder-compact {
+  padding: 8rpx 16rpx;
+}
+
+.reminder-symbol {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 56rpx;
+  height: 56rpx;
+  margin-right: 8rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.reminder-interview {
+  background-color: #FFF0DF;
+  color: #985016;
+}
+
+.reminder-followup {
+  background-color: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.reminder-copy,
+.reminder-when,
+.reminder-extra {
+  display: flex;
+  flex-direction: column;
+}
+
+.reminder-title,
+.reminder-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reminder-title {
+  color: var(--ink);
+  font-size: 27rpx;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.reminder-subtitle {
+  margin-top: 8rpx;
+  color: var(--muted);
+  font-size: 22rpx;
+  line-height: 1.25;
+}
+
+.reminder-when {
+  flex-shrink: 0;
+  align-items: flex-end;
+  margin-left: 8rpx;
+}
+
+.reminder-time {
+  color: var(--primary-strong);
+  font-size: 24rpx;
+  font-weight: 650;
+}
+
+.reminder-overdue {
+  color: var(--danger);
+  font-size: 24rpx;
+}
+
+.reminder-extra {
+  margin: 8rpx 0 0 68rpx;
+  color: var(--muted);
+  font-size: 24rpx;
+  word-break: break-all;
+}

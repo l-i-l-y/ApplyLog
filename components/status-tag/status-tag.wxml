@@ -1,0 +1,5 @@
+
+<view class="status-tag" style="color: {{appearance.color}}; background-color: {{appearance.background}};">
+  <view class="status-tag-dot" style="background-color: {{appearance.color}};"></view>
+  <text>{{appearance.label}}</text>
+</view>

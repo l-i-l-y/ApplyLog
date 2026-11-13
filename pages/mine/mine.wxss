@@ -1,0 +1,82 @@
+
+.mine-summary {
+  background-color: #F0F3FF;
+  background-image: linear-gradient(125deg, #FFFFFF 0%, #EDF1FF 100%);
+}
+
+.mine-metrics {
+  display: flex;
+  flex-direction: row;
+  margin-top: 16rpx;
+}
+
+.mine-metric {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.mine-value {
+  color: var(--primary-strong);
+  font-size: 40rpx;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.mine-method {
+  margin-top: 16rpx;
+}
+
+.mine-counts {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+
+.mine-count {
+  box-sizing: border-box;
+  width: 50%;
+  padding: 8rpx 16rpx 8rpx 0;
+}
+
+.mine-count-value {
+  color: var(--ink);
+  font-size: 26rpx;
+  font-weight: 650;
+}
+
+.mine-setting {
+  min-height: 96rpx;
+  padding: 8rpx 0;
+  border-bottom-width: 2rpx;
+  border-bottom-style: solid;
+  border-bottom-color: var(--line);
+}
+
+.mine-setting-copy {
+  display: flex;
+  flex-direction: column;
+  margin-right: 16rpx;
+}
+
+.mine-setting-title {
+  color: var(--ink);
+  font-size: 28rpx;
+  font-weight: 650;
+}
+
+.mine-danger {
+  color: var(--danger);
+}
+
+.mine-brand {
+  margin-top: 8rpx;
+  color: var(--primary-strong);
+  font-weight: 650;
+}
+
+.mine-about {
+  margin-top: 8rpx;
+}

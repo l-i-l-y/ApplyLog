@@ -1,0 +1,9 @@
+
+<view class="surface empty-state">
+  <view class="empty-symbol" aria-hidden="true"><text>{{symbol}}</text></view>
+  <text class="empty-title">{{title}}</text>
+  <text wx:if="{{description}}" class="muted empty-description">{{description}}</text>
+  <view wx:if="{{actionLabel}}" class="button button-small button-soft empty-action" hover-class="is-pressed" bindtap="act" aria-role="button">
+    <text>{{actionLabel}}</text>
+  </view>
+</view>

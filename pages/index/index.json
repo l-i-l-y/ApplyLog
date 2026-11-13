@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "app-card": "/components/app-card/app-card",
+    "empty-state": "/components/empty-state/empty-state",
+    "reminder-item": "/components/reminder-item/reminder-item"
+  }
+}

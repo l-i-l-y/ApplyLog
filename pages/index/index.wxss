@@ -1,0 +1,217 @@
+
+.home-content {
+  padding-top: 16rpx;
+}
+
+.home-greeting {
+  margin-bottom: 16rpx;
+}
+
+.home-heading {
+  color: var(--ink);
+  font-size: 40rpx;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.home-summary {
+  display: flex;
+  flex-direction: column;
+  padding: 24rpx;
+  border-radius: 32rpx;
+  background-color: #354DCB;
+  background-image: linear-gradient(120deg, #3448C4 0%, #4F67DE 68%, #5D72E4 100%);
+  color: #FFFFFF;
+  box-shadow: 0 12rpx 28rpx rgba(56, 78, 188, 0.22);
+}
+
+.home-summary-header {
+  min-height: 40rpx;
+}
+
+.home-summary-label {
+  color: #F0F3FF;
+  font-size: 26rpx;
+  font-weight: 650;
+}
+
+.week-control {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 80rpx;
+  margin-top: -16rpx;
+  margin-bottom: -16rpx;
+}
+
+.week-chip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 6rpx 16rpx;
+  border-radius: 24rpx;
+  background-color: rgba(255, 255, 255, 0.17);
+  color: #FFFFFF;
+  font-size: 22rpx;
+  font-weight: 650;
+}
+
+.week-info {
+  margin-left: 8rpx;
+  color: #FFFFFF;
+  font-size: 22rpx;
+}
+
+.home-total {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin: 0 0 8rpx;
+}
+
+.home-number {
+  color: #FFFFFF;
+  font-size: 72rpx;
+  font-weight: 800;
+  line-height: 1.04;
+}
+
+.home-unit {
+  margin-left: 8rpx;
+  color: #E8ECFF;
+  font-size: 28rpx;
+  font-weight: 650;
+}
+
+.distribution-track {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 12rpx;
+  overflow: hidden;
+  border-radius: 8rpx;
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.distribution-piece {
+  height: 12rpx;
+}
+
+.distribution-legend {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 33.333%;
+  min-height: 32rpx;
+}
+
+.legend-dot {
+  width: 8rpx;
+  height: 8rpx;
+  margin-right: 8rpx;
+  border-radius: 50%;
+}
+
+.legend-label {
+  color: #F1F3FF;
+  font-size: 22rpx;
+}
+
+.legend-count {
+  margin-left: 8rpx;
+  color: #FFFFFF;
+  font-size: 22rpx;
+  font-weight: 750;
+}
+
+.distribution-empty {
+  margin-top: 8rpx;
+  color: #F1F3FF;
+  font-size: 24rpx;
+}
+
+.home-add {
+  margin-top: 16rpx;
+}
+
+.home-add-icon {
+  margin-right: 8rpx;
+  font-size: 36rpx;
+  font-weight: 500;
+}
+
+.schedule-panel {
+  padding: 0 8rpx;
+}
+
+.schedule-row,
+.recent-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-row-separator {
+  border-top-width: 2rpx;
+  border-top-style: solid;
+  border-top-color: var(--line);
+}
+
+.schedule-empty {
+  padding: 16rpx 16rpx;
+}
+
+.schedule-empty-symbol {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 56rpx;
+  height: 56rpx;
+  margin-right: 8rpx;
+  border-radius: 16rpx;
+  background-color: var(--primary-soft);
+  color: var(--primary-strong);
+  font-size: 30rpx;
+}
+
+.schedule-empty-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-empty-title {
+  color: var(--ink);
+  font-size: 26rpx;
+  font-weight: 650;
+}
+
+.home-overdue {
+  padding: 0 8rpx;
+}
+
+.overdue-toggle {
+  min-height: 88rpx;
+  padding: 0 16rpx;
+}
+
+.overdue-heading {
+  color: var(--danger);
+  font-size: 28rpx;
+  font-weight: 650;
+}
+
+.home-more {
+  padding: 8rpx 0 8rpx 8rpx;
+}
+
+.recent-row {
+  margin-bottom: 8rpx;
+}

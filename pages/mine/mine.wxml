@@ -1,0 +1,72 @@
+
+<view class="page-shell">
+  <view class="page-nav">
+    <navigation-bar title="我的" back="{{false}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+  </view>
+  <scroll-view class="page-scroll" type="list" scroll-y>
+    <view class="page-content">
+      <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取本机数据…</text></view>
+      <view wx:elif="{{error}}">
+        <empty-state symbol="!" title="暂时无法读取本机数据" description="{{error}}" action-label="重试"
+          bind:action="loadProfile"></empty-state>
+        <view class="button button-soft section" hover-class="is-pressed" bindtap="exportJson" aria-role="button"><text>导出原始 JSON 备份</text></view>
+      </view>
+      <block wx:else>
+        <view class="surface panel mine-summary">
+          <text class="title">投递统计</text>
+          <view class="mine-metrics">
+            <view class="mine-metric">
+              <text class="mine-value">{{summary.total}}</text><text class="muted">总投递</text>
+            </view>
+            <view class="mine-metric">
+              <text class="mine-value">{{summary.weekAdded}}</text><text class="muted">本周新增</text>
+            </view>
+            <view class="mine-metric">
+              <text class="mine-value">{{summary.replyRate}}%</text><text class="muted">回复率</text>
+            </view>
+            <view class="mine-metric">
+              <text class="mine-value">{{summary.offerRate}}%</text><text class="muted">Offer 率</text>
+            </view>
+          </view>
+          <text wx:if="{{summary.total}}" class="muted mine-method">回复按曾收到笔试、面试、Offer 或未通过的投递计算。Offer 率按曾获得 Offer 的投递计算。</text>
+          <text wx:else class="muted mine-method">添加投递后，这里会汇总你的进度。</text>
+        </view>
+
+        <view wx:if="{{summary.total}}" class="surface panel section">
+          <text class="title">当前状态</text>
+          <view class="mine-counts">
+            <view wx:for="{{counts}}" wx:key="id" class="row-between mine-count">
+              <status-tag status="{{item.id}}"></status-tag><text class="mine-count-value">{{item.count}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="surface panel section">
+          <text class="title">本机数据</text>
+          <view class="row-between mine-setting" hover-class="is-pressed" bindtap="exportJson" aria-role="button">
+            <view class="grow mine-setting-copy"><text class="mine-setting-title">导出数据</text><text class="muted">将记录以 JSON 格式复制到剪贴板</text></view>
+            <text class="link">复制 ›</text>
+          </view>
+          <view class="row-between mine-setting" hover-class="is-pressed" bindtap="loadDemo" aria-role="button">
+            <view class="grow mine-setting-copy"><text class="mine-setting-title">加载示例数据</text><text class="muted">体验不同的投递进度和近期提醒</text></view>
+            <text class="link">加载 ›</text>
+          </view>
+          <view wx:if="{{summary.demoCount}}" class="row-between mine-setting" hover-class="is-pressed" bindtap="removeDemo" aria-role="button">
+            <view class="grow mine-setting-copy"><text class="mine-setting-title">移除示例数据</text><text class="muted">当前有 {{summary.demoCount}} 条示例投递</text></view>
+            <text class="link">移除 ›</text>
+          </view>
+          <view wx:if="{{summary.total}}" class="row-between mine-setting" hover-class="is-pressed" bindtap="requestClear" aria-role="button">
+            <view class="grow mine-setting-copy"><text class="mine-setting-title mine-danger">清空数据</text><text class="muted">删除本机投递、应用内提醒与复盘</text></view>
+            <text class="mine-danger">›</text>
+          </view>
+        </view>
+      </block>
+
+      <view class="surface panel section">
+        <text class="title">关于投递有数</text>
+        <text class="mine-brand">ApplyLog</text>
+        <text class="muted mine-about">记录求职投递、安排跟进和复盘面试。数据保存在当前设备。</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

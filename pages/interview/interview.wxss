@@ -1,0 +1,75 @@
+
+.review-company {
+  word-break: break-all;
+  margin-right: 8rpx;
+}
+
+.review-position {
+  margin-top: 8rpx;
+  word-break: break-all;
+}
+
+.review-metadata {
+  display: flex;
+  flex-direction: row;
+}
+
+.review-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.review-date {
+  margin-left: 16rpx;
+}
+
+.question-card {
+  margin-bottom: 16rpx;
+}
+
+.question-title {
+  color: var(--ink);
+  font-size: 28rpx;
+  font-weight: 650;
+}
+
+.question-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72rpx;
+  min-height: 72rpx;
+  box-sizing: border-box;
+  padding: 8rpx;
+  color: var(--danger);
+  font-size: 24rpx;
+}
+
+.review-question-input {
+  height: 112rpx;
+}
+
+.review-stars {
+  display: flex;
+  flex-direction: row;
+}
+
+.review-star {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  margin-right: 8rpx;
+  border-radius: 16rpx;
+  background-color: #F0F2F8;
+  color: #77829B;
+  font-size: 40rpx;
+}
+
+.review-star-selected {
+  background-color: #FFF1DE;
+  color: #9B5809;
+}
+

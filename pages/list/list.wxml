@@ -1,0 +1,50 @@
+
+<view class="page-shell">
+  <view class="page-nav">
+    <navigation-bar title="投递列表" back="{{false}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+  </view>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
+    <view class="list-controls">
+      <view class="row list-search surface">
+        <view class="search-mark" aria-hidden="true">
+          <view class="search-lens"></view><view class="search-handle"></view>
+        </view>
+        <input id="list-search" data-anchor="list-search" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindblur="onKeyboardBlur" bindkeyboardheightchange="onFieldKeyboardHeight" class="grow search-input" value="{{query}}" placeholder="搜索公司或岗位" confirm-type="search"
+          aria-label="搜索公司或岗位" bindinput="onSearch" />
+        <view wx:if="{{query}}" class="search-clear" hover-class="is-pressed" bindtap="clearSearch" aria-role="button" aria-label="清空搜索">
+          <text>×</text>
+        </view>
+      </view>
+      <view class="row-wrap list-filters" aria-label="状态筛选">
+        <view wx:for="{{filters}}" wx:key="id" class="chip {{filter === item.id ? 'chip-selected' : ''}}"
+          data-filter="{{item.id}}" hover-class="is-pressed" bindtap="selectFilter" aria-role="button"><text>{{item.label}}</text></view>
+      </view>
+      <view class="row-between list-heading">
+        <view class="row">
+          <text class="title">投递记录</text>
+          <text wx:if="{{!loading && !error}}" class="muted list-count">{{records.length}} 条</text>
+        </view>
+        <view class="link list-create" hover-class="is-pressed" bindtap="createApplication" aria-role="button"><text>＋ 记一笔</text></view>
+      </view>
+    </view>
+
+    <view wx:if="{{loading}}" class="list-row"><view class="surface loading-card"><text>正在读取投递记录…</text></view></view>
+    <view wx:elif="{{error}}" class="list-row">
+      <empty-state symbol="!" title="暂时无法读取投递列表" description="{{error}}" action-label="重试" bind:action="loadList"></empty-state>
+    </view>
+    <view wx:elif="{{!records.length}}" class="list-row">
+      <empty-state wx:if="{{hasFilter}}" symbol="⌕" title="暂无匹配的投递" description="试试其他关键词，或重置状态筛选。"
+        action-label="重置筛选" bind:action="resetFilters"></empty-state>
+      <empty-state wx:else symbol="✉" title="暂无投递记录" description="记下公司和岗位，就能在这里跟踪进展。"
+        action-label="记一笔投递" bind:action="createApplication"></empty-state>
+    </view>
+    <block wx:else>
+      <view wx:for="{{records}}" wx:key="id" class="list-row" data-id="{{item.id}}" hover-class="card-pressed"
+        bindtap="openApplication" bindlongpress="openMenu" aria-role="button">
+        <app-card item="{{item}}" show-menu="{{true}}" bind:menu="openMenu"></app-card>
+      </view>
+    </block>
+    <view class="list-bottom"></view>
+  </scroll-view>
+  <view wx:if="{{keyboardInset}}" class="keyboard-space" style="height: {{keyboardInset}}px;" aria-hidden="true"></view>
+</view>

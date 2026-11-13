@@ -1,0 +1,90 @@
+
+<view class="page-shell">
+  <view class="page-nav">
+    <navigation-bar title="{{pageTitle}}" loading="{{loading}}" background="#F6F7FB" color="#192439"></navigation-bar>
+  </view>
+  <scroll-view class="page-scroll" type="list" scroll-y scroll-top="{{keyboardScrollTop}}" bindscroll="onKeyboardScroll" bindtouchstart="onKeyboardTouchStart">
+    <view class="page-content page-content-safe">
+      <view wx:if="{{loading}}" class="surface loading-card"><text>正在读取投递信息…</text></view>
+      <empty-state wx:elif="{{error}}" title="暂时无法打开表单" description="{{error}}" action-label="重试" symbol="!" bind:action="loadRecord"></empty-state>
+      <block wx:else>
+        <view class="surface panel">
+          <view class="row-between"><text class="title">投递信息</text><text wx:if="{{demo}}" class="demo-pill">示例</text></view>
+          <text wx:if="{{demo}}" class="muted more-summary">移除示例数据时会一并移除此记录。</text>
+          <view class="field">
+            <text class="field-label">公司 <text class="required-mark">*</text></text>
+            <input id="edit-company" data-anchor="edit-company" class="field-input {{errors.company ? 'field-invalid' : ''}}" value="{{form.company}}" data-field="company"
+              placeholder="例如：云岸科技" maxlength="80" aria-label="公司名称" bindinput="onInput"
+              focus="{{focusField === 'company'}}" bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight" confirm-type="next" confirm-hold="{{true}}"
+              data-next="position" bindconfirm="focusNext" />
+            <text wx:if="{{errors.company}}" class="field-error">请填写公司名称</text>
+          </view>
+          <view class="field">
+            <text class="field-label">岗位 <text class="required-mark">*</text></text>
+            <input id="edit-position" data-anchor="edit-position" class="field-input {{errors.position ? 'field-invalid' : ''}}" value="{{form.position}}" data-field="position"
+              placeholder="例如：前端工程师" maxlength="80" aria-label="岗位名称" bindinput="onInput"
+              focus="{{focusField === 'position'}}" bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight" confirm-type="{{expanded ? 'next' : 'done'}}" confirm-hold="{{expanded}}"
+              data-next="{{expanded ? 'city' : ''}}" bindconfirm="focusNext" />
+            <text wx:if="{{errors.position}}" class="field-error">请填写岗位名称</text>
+          </view>
+        </view>
+
+        <view class="surface panel section">
+          <view class="row-between more-toggle" hover-class="is-pressed" bindtap="toggleMore" aria-role="button">
+            <text class="title">更多信息</text>
+            <text class="link">{{expanded ? '收起' : '展开'}}</text>
+          </view>
+          <text wx:if="{{!expanded}}" class="muted more-summary">投递日期 {{form.date}}{{form.channel ? ' · ' + form.channel : ' · 可补充渠道、地点和备注'}}</text>
+          <block wx:else>
+            <view class="field">
+              <text class="field-label">投递日期</text>
+              <picker mode="date" value="{{form.date}}" end="{{today}}" bindchange="pickDate">
+                <view class="field-picker {{errors.date ? 'field-invalid' : ''}}"><text>{{form.date}}</text><text class="subtle">›</text></view>
+              </picker>
+              <text wx:if="{{errors.date}}" class="field-error">请选择有效的投递日期</text>
+            </view>
+            <view class="field">
+              <text class="field-label">渠道</text>
+              <view class="row-wrap">
+                <view wx:for="{{channels}}" wx:key="*this" class="chip {{form.channel === item ? 'chip-selected' : ''}}"
+                  data-channel="{{item}}" hover-class="is-pressed" bindtap="chooseChannel" aria-role="button">
+                  <text>{{item}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="field">
+              <text class="field-label">城市</text>
+              <input id="edit-city" data-anchor="edit-city" class="field-input" value="{{form.city}}" data-field="city" placeholder="选填" maxlength="40" aria-label="城市" bindinput="onInput" focus="{{focusField === 'city'}}"
+                bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight" confirm-type="next" confirm-hold="{{true}}" data-next="{{salaryCustom ? 'salary' : 'jdLink'}}" bindconfirm="focusNext" />
+            </view>
+            <view class="field">
+              <text class="field-label">薪资</text>
+              <picker mode="selector" range="{{salaryOptions}}" value="{{salaryIndex}}" bindchange="pickSalary" aria-label="薪资选择">
+                <view class="field-picker"><text>{{salaryOptions[salaryIndex]}}</text><text class="subtle">›</text></view>
+              </picker>
+              <text class="muted salary-hint">预设区间为税前月薪，K = 千元人民币</text>
+              <input wx:if="{{salaryCustom}}" id="edit-salary" data-anchor="edit-salary" class="field-input salary-custom" value="{{form.salary}}" data-field="salary" placeholder="例如：年薪30万 · 16薪" maxlength="40" aria-label="自定义薪资，最多40字" bindinput="onInput" focus="{{focusField === 'salary'}}"
+                bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight" confirm-type="next" confirm-hold="{{true}}" data-next="jdLink" bindconfirm="focusNext" />
+            </view>
+            <view class="field">
+              <text class="field-label">职位链接</text>
+              <input id="edit-jdLink" data-anchor="edit-jdLink" class="field-input" value="{{form.jdLink}}" data-field="jdLink" placeholder="粘贴职位描述链接" maxlength="500" aria-label="职位链接" bindinput="onInput" focus="{{focusField === 'jdLink'}}"
+                bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight" confirm-type="next" confirm-hold="{{true}}" data-next="note" bindconfirm="focusNext" />
+            </view>
+            <view class="field">
+              <text class="field-label">备注</text>
+              <textarea style="max-height: {{keyboardInputMaxHeight}}px;" cursor-spacing="12" id="edit-note" data-anchor="edit-note" class="field-textarea" value="{{form.note}}" data-field="note" placeholder="补充职位要求或投递背景" maxlength="1000" aria-label="备注" bindinput="onInput"
+                focus="{{focusField === 'note'}}" bindblur="clearFocus" adjust-position="{{false}}" hold-keyboard="{{true}}" bindfocus="onKeyboardFocus" bindkeyboardheightchange="onFieldKeyboardHeight"></textarea>
+            </view>
+          </block>
+        </view>
+      </block>
+    </view>
+  </scroll-view>
+  <view wx:if="{{!loading && !error}}" class="form-actions {{keyboardHeight ? 'keyboard-actions' : ''}}">
+    <view class="button button-primary" hover-class="is-pressed" bindtap="saveApplication" aria-role="button">
+      <text>{{saving ? '保存中…' : '保存投递'}}</text>
+    </view>
+  </view>
+  <view wx:if="{{keyboardInset}}" class="keyboard-space" style="height: {{keyboardInset}}px;" aria-hidden="true"></view>
+</view>
